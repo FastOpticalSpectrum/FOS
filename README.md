@@ -8,7 +8,7 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 + Xiulin Ruan:ruan@purdue.edu
 
 
-## How to download __`FOS`__
+## How to download and use __`FOS`__
 
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown below, what is needed is:
