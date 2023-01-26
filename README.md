@@ -1,5 +1,5 @@
 # **FOS**
-FOS, which means "light" in Greek, is used for Fast Optical Spectrum (FOS) calculations for nanoparticle media
+__FOS__, which means "light" in Greek, is used for Fast Optical Spectrum (FOS) calculations for nanoparticle media
 ## Authors and References
 + Daniel Carne: dcarne@purdue.edu
 + Joseph Peoples: 
