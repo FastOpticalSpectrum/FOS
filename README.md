@@ -20,7 +20,7 @@ Each input file contains a header and a body. The header consists of information
 + The solar spectrum to integrate with the reflectance (not required).
 + The number of photons if running a Monte Carlo simulation.
 
-More information about item in the input file is in the appendix at the bottom of this Readme.md file! 
+More information about item in the input file is in the appendix at the bottom. 
 
 ```
 mc
