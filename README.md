@@ -1,5 +1,5 @@
 # __`FOS`__
-__'FOS'__, which means "light" in Greek, is used for Fast Optical Spectrum (FOS) calculations for nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
+__`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS`) calculations for nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
 ## Authors and References
 + Daniel Carne: dcarne@purdue.edu
 + Joseph Peoples: 
@@ -8,7 +8,7 @@ __'FOS'__, which means "light" in Greek, is used for Fast Optical Spectrum (FOS)
 + Xiulin Ruan:ruan@purdue.edu
 
 
-## How to download __'FOS'__
+## How to download __`FOS`__
 
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown below, what is needed is:
