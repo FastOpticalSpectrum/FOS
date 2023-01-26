@@ -1,8 +1,10 @@
 # FOS
-Fast Optical Spectrum calculations for nanoparticle media
-## Intro stuff
+FOS, which means "light" in Greek, is used for Fast Optical Spectrum (FOS) calculations for nanoparticle media
+## Authors and References
++ Daniel Carne: dcarne@purdue.edu
 
-## How to download and use NAME
+
+## How to download and use FOS
 
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown below, what is needed is:
