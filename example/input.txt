@@ -1,0 +1,58 @@
+MC
+# MC for Monte-Carlo or NN for neural network on the first line
+# a hashtag comments out a line
+
+# output file prefix
+Output: Test
+
+# import the material property files for all particles and mediums
+Particle 1: BaSO4.txt
+Particle 2: TIO2.txt
+Medium 1: Acr.txt
+
+# Mesh defaults to 1 if not in the input file
+# this value increases or decreases the number of wavelengths simulated
+Mesh: 0.5
+
+# if solar is included, it will integrate to get the solar reflectance of each sim
+Solar: AM15.txt
+
+# number of photons if using Monte Carlo simulations
+Photons: 30000
+
+
+# single layer example
+Sim: 1
+Upper: 1
+Lower: 1
+Layer 1
+Medium 1
+T: 250
+Particle 1
+D: 0.4
+VF: 60
+Dist: 0
+
+# multi-layer example with multiple particle types used
+Sim: 2
+Upper: 1
+Lower: 1
+Layer 1
+Medium 1
+T: 100
+Particle 1
+D: 0.4
+VF: 30
+Dist: 0
+Particle 2
+D: 0.3
+VF: 30
+Dist: 0
+Layer 2
+Medium 1
+T: 150
+Particle 1
+D: 0.4, 0.8
+VF: 40, 20
+Dist: 0
+
