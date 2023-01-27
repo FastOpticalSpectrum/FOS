@@ -11,6 +11,8 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 ## How to download and use __`FOS`__
 There are two main ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. Alternatively, for other operating systems or for security reasons, one can use the Python source code in the src folder by simply running Main3.py. This was built in Python 3.10 and is not guranteed to work in other versions. 
 
+If you have any questions, issues, or requests, please put them in the Discussions tab!
+
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown below, what is needed is:
 + Either "MC" or "NN" in the first line to specify Monte Carlo simulation or Neural Network prediction.
