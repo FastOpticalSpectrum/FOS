@@ -9,6 +9,7 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 
 
 ## How to download and use __`FOS`__
+There are two main ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. Alternatively, for other operating systems or for security reasons, one can use the Python source code in the src folder by simply running Main3.py. This was built in Python 3.10 and is not guranteed to work in other versions. 
 
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown below, what is needed is:
@@ -85,7 +86,7 @@ D: 0.5
 VF: 60
 Dist: 45
 ```
-An example input file is provided (input.txt) which shows examples of different simulation features.
+An example input file is provided (input.txt) in the example folder which shows examples of different simulation features.
 
 ## Output files
 There will be an output file generated for each simulation ran. Each file will be named the output file prefix followed by the simulation number. For example, using the above input file the output files would be test1.txt and test2.txt. Each of these files will have 5 columns, the wavelength, specular reflectance, diffuse reflectance, absortance, and transmittance.
