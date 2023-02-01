@@ -16,7 +16,7 @@ Alternatively, for other operating systems or for security reasons, one can use 
 If you have any questions, issues, or requests, please put them in the Discussions tab!
 
 ## Input file
-Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown below, what is needed is:
+Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown in the example below, what is needed is:
 + Either "MC" or "NN" in the first line to specify Monte Carlo simulation or Neural Network prediction.
 + The output file prefix.
 + At least one particle .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
@@ -24,6 +24,8 @@ Each input file contains a header and a body. The header consists of information
 + The mesh setting (defaults to 1 if not included).
 + The solar spectrum to integrate with the reflectance (not required).
 + The number of photons if running a Monte Carlo simulation.
+
+You can learn more about what each of these inputs mean in the appendix at the bottom.
 
 Example header:
 
