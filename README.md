@@ -1,5 +1,5 @@
 # __`FOS`__
-__`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS`) calculations of nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
+__`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS`) calculations for nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
 ## Authors and References
 + Daniel Carne: dcarne@purdue.edu
 + Joseph Peoples: 
