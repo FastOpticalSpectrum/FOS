@@ -46,6 +46,8 @@ def fresnel_reflectance(n_medium, n_outer, uz):
     else:
         temp_1 = (1.0 - uz * uz) ** 0.5
         temp_2 = n_medium * temp_1 / n_outer
+        if temp_2 >= 1:
+            return 1, 0
         temp_3 = (1-temp_2*temp_2)**0.5
         temp_4 = uz*temp_3 - temp_1*temp_2
         temp_5 = uz*temp_3 + temp_1*temp_2
@@ -187,11 +189,14 @@ def setup_mc(layer, layer_depths, crit_cos, num_layers):
         n_medium = layer[i+1, 0]
         if n_medium > n_up:
             crit_cos[0, i] = (1.0 - n_up * n_up / (n_medium * n_medium)) ** 0.5
+        else:
+            crit_cos[0, i] = 0
         # lower interface critical cosine
         n_down = layer[i+2, 0]
-        if n_medium > n_up:
+        if n_medium > n_down:
             crit_cos[1, i] = (1.0 - n_down * n_down / (n_medium * n_medium)) ** 0.5
-
+        else:
+            crit_cos[1, i] = 0
     return layer_depths, crit_cos
 
 
@@ -246,9 +251,9 @@ def main_mc(prop, photons):
     results = zeros((0, 4))
     count = 0
     total_sims = count_sims(prop)
-    n = get_num_threads()
-    set_num_threads(n - 1)
-    print("Running Monte Carlo using", n-1, "/", n, "available threads.")
+    #n = get_num_threads()
+    #set_num_threads(n - 1)
+    #print("Running Monte Carlo using", n-1, "/", n, "available threads.")
     for i in range(len(prop[:, 0])):
         if prop[i, 0] == 0:
             count += 1
