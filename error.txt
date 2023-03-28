@@ -1,0 +1,3 @@
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-gziqi'
+findfont: Font family ['sans-serif'] not found. Falling back to DejaVu Sans.
+findfont: Font family ['sans-serif'] not found. Falling back to DejaVu Sans.

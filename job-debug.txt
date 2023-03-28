@@ -1,0 +1,10 @@
+#!/bin/sh -l
+#SBATCH --job-name MCPT
+#SBATCH -A debug
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=24
+#SBATCH --time=30:00
+#SBATCH --error=./error.txt
+
+module load anaconda/2020.11-py38
+python Main3.py <<< "input.txt"
