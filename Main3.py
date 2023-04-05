@@ -9,7 +9,6 @@ from interpolate import interpolate
 ###### Ziqi's code, plot the results ######
 import matplotlib.pyplot as plt
 from numpy import max
-import numpy as np
 ###### end of Ziqi's code ######
 
 
@@ -538,24 +537,6 @@ def main_func():
         plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
         plt.savefig("Spectral_Responce{}.png".format(i+1))
-
-
-    # compare with the step function
-    step_function_score_list = []
-    for alpha in wavelengths:
-        # how close the step function is to the results
-        step_function_score = np.sum(np.where(wavelengths <= alpha,1-(results[:, 0]+results[:, 1]),results[:, 0]+results[:, 1]))
-        step_function_score_list.append(step_function_score)
-    step_function_score_array = np.array(step_function_score_list)
-    min_step_function_score = np.min(step_function_score_array)
-    argmin_step_function_score = wavelengths[np.argmin(step_function_score_array)] # the wavelength that gives the minimum step function score
-    print('min_step_function_score: {}'.format(min_step_function_score))
-    print('wavelength-for-min_step_function_score: {}'.format(argmin_step_function_score))
-    with open('min_step_function_score.txt', 'w') as f:
-        f.write('min_step_function_score: {}'.format(min_step_function_score))
-        f.write('\n')
-        f.write('wavelength-for-min_step_function_score: {}'.format(argmin_step_function_score))
-
 
     ###### end of Ziqi's code ######
     return
