@@ -538,6 +538,29 @@ def main_func():
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
         plt.savefig("Spectral_Responce{}.png".format(i+1))
 
+
+        # plot the R, A, T in visible range
+        plt.figure(figsize=figsize,dpi=dpi)
+        plt.plot(wavelengths, 100*R_results, label="R",color = 'black',linewidth = linewidth)
+        plt.plot(wavelengths, 100*A_results, label="A",color = 'red',linewidth = linewidth)
+        plt.plot(wavelengths, 100*T_results, label="T",color = 'blue',linewidth = linewidth)
+
+        # plot the solar spectrum
+        if solar != "":
+            solar_arr = loadtxt(solar)
+            plt.fill_between(solar_arr[:,0],
+                    100*solar_arr[:,1]/max(solar_arr[:,1]),
+                    color='pink',
+                    alpha=0.5)
+            
+        # plot configuration
+        plt.xlim(0.36,0.83)
+        plt.ylim(0,100)
+        plt.xlabel('Wavelength (um)',fontsize = label_font_size)
+        plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
+        plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
+        plt.savefig("VIS_Spectral_Responce{}.png".format(i+1))
+
     ###### end of Ziqi's code ######
     return
 
