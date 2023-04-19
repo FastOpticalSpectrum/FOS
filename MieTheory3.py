@@ -206,6 +206,158 @@ def mie_theory(r1, fv1, paint, acr, thickness, dist):
     return prop
 
 
+
+def mie_theory_coreshell(r1, s1, fv1, paint_core, paint_shell, acr, thickness, dist):
+
+    # r1 = core radius
+    # s1 = shell thickness
+    # fv1 = volume fraction of coreshell particles
+        # r1, s1, fv1 = arrays of the same length
+    # paint_core = core material refractive index
+    # paint_shell = shell material refractive index
+    # acr = matrix refractive index
+    # thickness = thickness of the layer
+    # dist = distribution of the particles (not used yet)   
+        # maybe we can get distribution on r_total and then split it into r1 and s1
+
+    import numpy as np
+    from scipy.special import jv, yv, hankel1
+
+
+    r_total = r1 + s1 # total radius of the coreshell particle
+
+    wave = paint_core[:, 0] # same as paint_shell[:, 0] and acr[:, 0]? Need to check if they are the same
+    prop = zeros((5, int(len(wave))))
+    particles = int(len(r1))
+
+
+    qs_i = zeros(particles)
+    qa_i = zeros(particles)
+    asy_i = zeros(particles)
+
+    for i in range(len(wave)):
+        # for particle 1
+        n_core = paint_core[i, 1]
+        k_core = paint_core[i, 2]
+        m_core = complex(n_core, k_core)
+
+        # for particle 2
+        n_shell = paint_shell[i, 1]
+        k_shell = paint_shell[i, 2]
+        m_shell = complex(n_shell, k_shell)
+
+        # for matrix
+        n_m = acr[i, 1]
+        k_m = acr[i, 2]
+        m_m = complex(n_m, k_m)
+
+        m1 = m_core/m_m
+        m2 = m_shell/m_m
+        m = m2/m1
+
+        for j in range(particles):
+
+            x = 2 * pi * r1[j] * m_m / wave[i] # size parameter for core
+            y = 2 * pi * r_total[j] * m_m / wave[i]  # size paramete for shell
+
+
+            nmax = ceil(abs(y) + 4.3 * abs(y) ** (1 / 3) + 2) # Converge criteria for bessel functions
+            an = zeros(int(nmax), dtype=complex128)
+            bn = zeros(int(nmax), dtype=complex128)
+            cn = zeros(int(nmax))
+
+
+            # calculate coreshell mie coefficients
+            for n in range(1, nmax+1):
+                phiny = np.sqrt(np.pi*y/2)*jv(n+1/2, y)
+                phiny2 = np.sqrt(np.pi*m2*y/2)*jv(n+1/2, m2*y)
+                phinx = np.sqrt(np.pi*m2*x/2)*jv(n+1/2, m2*x)
+                kany = -np.sqrt(np.pi*m2*y/2)*yv(n+1/2, m2*y)
+                kanx = -np.sqrt(np.pi*m2*x/2)*yv(n+1/2, m2*x)
+            #     kanx2 = -np.sqrt(np.pi*m1*x/2)*yv(n+1/2, m1*x)
+                kanydy = -0.5*np.sqrt(np.pi/(2*m2*y))*(m2*y*yv(n-1/2, m2*y)
+                                                        +yv(n+1/2, m2*y)
+                                                        -m2*y*yv(n+3/2, m2*y))
+                kanxdx = -0.5*np.sqrt(np.pi/(2*m2*x))*(m2*x*yv(n-1/2, m2*x)
+                                                        +yv(n+1/2, m2*x)
+                                                        -m2*x*yv(n+3/2, m2*x))
+                ksen = np.sqrt(np.pi*y/2)*hankel1(n+1/2, y)
+                Deny = 0.5*np.sqrt(np.pi/(2*m2*y))*(m2*y*jv(n-1/2, m2*y)
+                                                    +jv(n+1/2, m2*y)
+                                                    -m2*y*jv(n+3/2, m2*y)) \
+                                                    /(np.sqrt(np.pi*m2*y/2)*jv(n+1/2, m2*y))
+                Denx1 = 0.5*np.sqrt(np.pi/(2*m1*x))*(m1*x*jv(n-1/2, m1*x)
+                                                        +jv(n+1/2, m1*x)
+                                                        -m1*x*jv(n+3/2, m1*x)) \
+                                                        /(np.sqrt(np.pi*m1*x)*jv(n+1/2, m1*x))
+                Denx2 = 0.5*np.sqrt(np.pi/(2*m2*x))*(m2*x*jv(n-1/2, m2*x)
+                                                        +jv(n+1/2, m2*x)
+                                                        -m2*x*jv(n+3/2, m2*x)) \
+                                                        /(np.sqrt(np.pi*m2*x)*jv(n+1/2, m2*x))
+
+                phiny_m1 = np.sqrt(np.pi*y/2)*jv(n-1/2, y)
+                ksen_m1 = np.sqrt(np.pi*y/2)*hankel1(n-1/2, y)
+
+                An = phinx*(m*Denx1-Denx2)/(m*Denx1*kanx-kanxdx)
+                Bn = phinx*(Denx1/m-Denx2)/(Denx1*kanx/m-kanxdx)
+
+                Dn = (Deny-An*kanydy/phiny2)/(1-An*kany/phiny2)
+                Gn = (Deny-Bn*kanydy/phiny2)/(1-Bn*kany/phiny2)
+
+
+                an[n-1] = ((Dn/m2+n/y)*phiny-phiny_m1)/((Dn/m2+n/y)*ksen-ksen_m1)
+                bn[n-1] = ((m2*Gn+n/y)*phiny-phiny_m1)/((m2*Gn+n/y)*ksen-ksen_m1)
+                cn[n-1] = 2*n+1
+
+        # calculate correction of matrix absorption
+        alpha = 4 * pi * r_total / wave[i] * k_m
+        if k_m < (5 * 10 ** -7):
+            gamma = 1
+        else:
+            gamma = 2 * (1 + (alpha - 1) * exp(alpha)) / (alpha ** 2)
+        if gamma < 1:
+            gamma = 1
+
+        # calculate scattering and extinction cross sections
+        q2 = 0
+        cext = 0
+        for k in range(int(nmax)):
+            q2 += cn[k] * (abs(an[k]) ** 2 + abs(bn[k]) ** 2)
+            temp = (an[k] + bn[k]) / (m_m ** 2)
+            cext += (wave[i] ** 2 / (2 * pi)) * (cn[k] * temp.real)
+        csca = q2 * (wave[i] ** 2) * exp(-4 * pi * r_total * (m_m.imag) / wave[i]) / (2 * pi * gamma * abs(m_m) ** 2)
+        qsca = csca / (pi * r_total * r_total)
+        qext = cext / (pi * r_total * r_total)
+
+        qs_i[j] = (1.5 * qsca * fv1[j] / (2 * r_total)) * 10 ** 4
+        qt = (1.5 * qext * fv1[j] / (2 * r_total)) * 10 ** 4
+        qa_i[j] = qt - qs_i[j]
+
+        # compiled function for asymmetry parameter calculation
+        asy_i[j] = asy_calc(nmax, an, bn, cn, qs_i, j)
+
+    # summing up for each particle size
+    qs = sum(qs_i)
+    qa = sum(qa_i)
+    asy = sum(asy_i)
+    # checking for bugs
+    if qa < (10 ** -3):
+        qa = 0
+    if qs < (10 ** -3):
+        qs = 0
+
+    prop[0, i] = n_m
+    prop[1, i] = qa
+    prop[2, i] = qs
+    prop[3, i] = asy
+    prop[4, i] = thickness
+
+
+    return prop
+
+
+
+
 @njit()
 def effective_medium(optics_sum, vol_frac_sum, acr):
     wave = acr[:, 0]
