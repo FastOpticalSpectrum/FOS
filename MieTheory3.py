@@ -226,7 +226,7 @@ def mie_theory_coreshell(r1, s1, fv1, paint_core, paint_shell, acr, thickness, d
 
     r_total = r1 + s1 # total radius of the coreshell particle
 
-    wave = paint_core[:, 0] # same as paint_shell[:, 0] and acr[:, 0]? Need to check if they are the same
+    wave = paint_core[:, 0] # same as paint_shell[:, 0] and acr[:, 0]
     prop = zeros((5, int(len(wave))))
     particles = int(len(r1))
 
@@ -236,12 +236,12 @@ def mie_theory_coreshell(r1, s1, fv1, paint_core, paint_shell, acr, thickness, d
     asy_i = zeros(particles)
 
     for i in range(len(wave)):
-        # for particle 1
+        # for particle core
         n_core = paint_core[i, 1]
         k_core = paint_core[i, 2]
         m_core = complex(n_core, k_core)
 
-        # for particle 2
+        # for particle shell
         n_shell = paint_shell[i, 1]
         k_shell = paint_shell[i, 2]
         m_shell = complex(n_shell, k_shell)
