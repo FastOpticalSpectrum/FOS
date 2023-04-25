@@ -1,0 +1,34 @@
+MC
+# MC for Monte-Carlo or NN for neural network
+
+Output: Test
+
+Particle 1: ag.txt
+Particle 2: sio2.txt
+Medium 1: air.txt
+
+Mesh: 2
+
+# if solar is included, that will be in the output results. If not, it will not.
+Solar: AM15.txt
+
+Photons: 10000
+
+
+Sim: 1
+
+Upper: 1
+Lower: 1
+
+Layer 1
+Medium 1
+T: 200
+Particle 2
+C: 0.04
+Particle 1
+S: 0.007
+VF: .005
+
+
+
+
