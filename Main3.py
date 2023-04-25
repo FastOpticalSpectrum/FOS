@@ -179,9 +179,10 @@ def optical(line, infile, particle, medium, check):
                     if wait is False:
                         check = check_dist(current_sim, dist, check)
                         optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                        optics_sum += optics
                 else:
                     optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
-                optics_sum += optics
+                    optics_sum += optics
             count += 1
             # holds previous ptype for core shell
             if count > 1:
@@ -262,7 +263,8 @@ def optical(line, infile, particle, medium, check):
             layers = 1
             count = 0
     # check to make sure same number of diameters as volume fractions
-    check = check_diameters(current_sim, fv, sizes, check)
+    if coreshell is False:
+        check = check_diameters(current_sim, fv, sizes, check)
     if coreshell is True:
         check = check_dist(current_sim, dist, check)
         optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
@@ -582,7 +584,7 @@ def main_func():
         plt.xlabel('Wavelength (um)',fontsize = label_font_size)
         plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
-        plt.savefig("Spectral_Responce{}.png".format(i+1))
+        plt.savefig(str(output_name)+"_Spectral_Responce{}.png".format(i+1))
 
 
         # plot the R, A, T in visible range
@@ -605,7 +607,7 @@ def main_func():
         plt.xlabel('Wavelength (um)',fontsize = label_font_size)
         plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
-        plt.savefig("VIS_Spectral_Responce{}.png".format(i+1))
+        plt.savefig(str(output_name)+"_VIS_Spectral_Responce{}.png".format(i+1))
 
     ###### end of Ziqi's code ######
     return
