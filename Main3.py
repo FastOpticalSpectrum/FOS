@@ -217,7 +217,7 @@ def optical(line, infile, particle, medium, check):
             wait = True
         elif infile[i][0:2] == "s:":
             shell = (infile[i][2:]).split(",")
-            shell = asarray(sizes, dtype=float)
+            shell = asarray(shell, dtype=float)
             wait = False
         elif infile[i][0:5] == "layer" and infile[i][5:] != "1":
             # check to make sure same number of diameters as volume fractions
