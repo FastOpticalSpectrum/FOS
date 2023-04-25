@@ -4,6 +4,7 @@ MC
 Output: Test
 
 Particle 1: BaSO4.txt
+Particle 2: beo.txt
 Medium 1: Acr.txt
 
 Mesh: 0.5
@@ -36,7 +37,10 @@ Layer 1
 Medium 1
 T: 700
 Particle 1
-D: 0.05
+C: 0.2
+Particle 2
+S: 0.02
 VF: 60
-Dist: 0
+
+
 

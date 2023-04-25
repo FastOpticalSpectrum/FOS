@@ -1,5 +1,5 @@
 from numpy import loadtxt, zeros, append, vstack, asarray, savetxt, dstack, round
-from MieTheory3 import mie_theory, effective_medium
+from MieTheory3 import mie_theory, effective_medium, mie_theory_coreshell
 from MonteCarlo import main_mc
 from SolarIntegration import solar_spectrum
 import os.path
@@ -144,6 +144,15 @@ def check_diameters(current_sim, fv, sizes, check):
         check = True
     return check
 
+# checks to make sure dist = 0 for core shell
+def check_dist(current_sim, dist, check):
+    # check to make sure same number of diameters and volume fraction
+    if dist != 0:
+        print('Dist must be 0 for core shell simulations', current_sim)
+        print("Please re-enter input file once corrected.")
+        check = True
+    return check
+
 
 # finds info from input and sends to Mie Theory to calculate optical properties
 def optical(line, infile, particle, medium, check):
@@ -155,14 +164,28 @@ def optical(line, infile, particle, medium, check):
     vol_frac_sum = 0
     layers = 1
     count = 0
+    # dist defaults to 0
+    dist = 0
+    # if coreshell is true then use that version of Mie theory, else use standard Mie theory
+    coreshell = False
+    # if wait is true, the shell particle must be read in as well
+    wait = False
 
     current_sim = 1
     for i in range(line+1, len(infile)):
         if infile[i][0:8] == "particle":
             if count > 0:
-                optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                if coreshell is True:
+                    if wait is False:
+                        check = check_dist(current_sim, dist, check)
+                        optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                else:
+                    optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
                 optics_sum += optics
             count += 1
+            # holds previous ptype for core shell
+            if count > 1:
+                ptypeCore = ptype
             ptype = int(infile[i][8])
         if infile[i][0:5] == "upper":
             upper = float(infile[i][6:])
@@ -177,6 +200,7 @@ def optical(line, infile, particle, medium, check):
             sizes = (infile[i][2:]).split(",")
             sizes = asarray(sizes, dtype=float)
             sizes = sizes/2
+            coreshell = False
         elif infile[i][0:3] == "vf:":
             fv = (infile[i][3:]).split(",")
             fv = asarray(fv, dtype=float)
@@ -185,11 +209,25 @@ def optical(line, infile, particle, medium, check):
         elif infile[i][0:5] == "dist:":
             dist = float(infile[i][5:])
             dist = dist/100
+        elif infile[i][0:2] == "c:":
+            core = (infile[i][2:]).split(",")
+            core = asarray(sizes, dtype=float)
+            core = sizes/2
+            coreshell = True
+            wait = True
+        elif infile[i][0:2] == "s:":
+            shell = (infile[i][2:]).split(",")
+            shell = asarray(sizes, dtype=float)
+            wait = False
         elif infile[i][0:5] == "layer" and infile[i][5:] != "1":
             # check to make sure same number of diameters as volume fractions
             check = check_diameters(current_sim, fv, sizes, check)
             layers += 1
-            optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+            if coreshell is True:
+                check = check_dist(current_sim, dist, check)
+                optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+            else:
+                optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
             optics_sum += optics
             optics_sum[0, :] = optics[0, :]
             optics_sum[4, :] = optics[4, :]
@@ -202,7 +240,11 @@ def optical(line, infile, particle, medium, check):
             current_sim = int(infile[i][4:])
             # check to make sure same number of diameters as volume fractions
             check = check_diameters(current_sim, fv, sizes, check)
-            optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+            if coreshell is True:
+                check = check_dist(current_sim, dist, check)
+                optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+            else:
+                optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
             optics_sum += optics
             optics_sum[0, :] = optics[0, :]
             optics_sum[4, :] = optics[4, :]
@@ -221,7 +263,11 @@ def optical(line, infile, particle, medium, check):
             count = 0
     # check to make sure same number of diameters as volume fractions
     check = check_diameters(current_sim, fv, sizes, check)
-    optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+    if coreshell is True:
+        check = check_dist(current_sim, dist, check)
+        optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+    else:
+        optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
     optics_sum += optics
     optics_sum[0, :] = optics[0, :]
     optics_sum[4, :] = optics[4, :]
@@ -312,7 +358,8 @@ def check_for_word_in_sim(infile, word, statement, check):
             word_present = 0
     if word_present == 1:
         check = True
-        print("Sim:" + sim_number + " must have " + statement)
+        if statement != '':
+            print("Sim:" + sim_number + " must have " + statement)
     return check
 
 # check the input file for errors
@@ -400,12 +447,11 @@ def check_input_for_errors(infile):
     check = check_for_word_in_sim(infile, 't:', 'a defined thickness', check)
     # check for at least one particle
     check = check_for_word_in_sim(infile, 'particle', 'at least one particle', check)
-    # check for particle size
-    check = check_for_word_in_sim(infile, 'd:', 'a defined particle diameter', check)
+    # check for diameter or core shell
+
     # check for VF
     check = check_for_word_in_sim(infile, 'vf', 'a defined particle volume fraction', check)
-    # check for distribution
-    check = check_for_word_in_sim(infile, 'dist', 'a defined distribution. Put Dist: 0 for no distribution', check)
+
 
 
     if check:
@@ -572,7 +618,7 @@ if __name__ == "__main__":
     print('\033[1m{: ^75s}\033[0m'.format("FOS"))
     print('{: ^75s}'.format("Fast Optical Spectrum calculations for nanoparticle media"))
     print('{: ^75s}'.format("Version: 0.4.0\n"))
-    print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Zherui Han, Dudong Feng, Xiulin Ruan"))
+    print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiulin Ruan"))
     print('{: ^75s}'.format("School of Mechanical Engineering, Purdue University"))
     print('{: ^75s}'.format("West Lafayette, IN 47909, USA\n"))
 

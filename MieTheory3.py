@@ -265,7 +265,7 @@ def mie_theory_coreshell(r1, s1, fv1, paint_core, paint_shell, acr, thickness, d
 
 
             # calculate coreshell mie coefficients
-            for n in range(1, nmax+1):
+            for n in range(1, int(nmax+1)):
                 phiny = sqrt(pi*y/2)*jv(n+1/2, y)
                 phiny2 = sqrt(pi*m2*y/2)*jv(n+1/2, m2*y)
                 phinx = sqrt(pi*m2*x/2)*jv(n+1/2, m2*x)
