@@ -211,7 +211,7 @@ def optical(line, infile, particle, medium, check):
             dist = dist/100
         elif infile[i][0:2] == "c:":
             core = (infile[i][2:]).split(",")
-            core = asarray(sizes, dtype=float)
+            core = asarray(core, dtype=float)
             core = core/2
             coreshell = True
             wait = True
