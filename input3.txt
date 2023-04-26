@@ -3,8 +3,8 @@ MC
 
 Output: Test
 
-Particle 1: ag_john.txt
-Particle 2: sio2_tong.txt
+Particle 1: ag.txt
+Particle 2: sio2.txt
 Medium 1: air.txt
 
 Mesh: 2
