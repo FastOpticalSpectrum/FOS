@@ -577,6 +577,23 @@ def main_func():
                 f.write(str(round(results[j + length * i, 2], 4)) + '\t')
                 f.write(str(round(results[j + length * i, 3], 4)) + '\t')
                 f.write('\n')
+            f.write('\n')
+            f.write('Input file:\n')
+            for j in range(len(infile)):
+                if infile[j][:3] == "sim":
+                    break
+                f.write(infile[j] + '\n')
+            for j in range(len(infile)):
+                if infile[j][:] == "sim:"+str(i+1):
+                    f.write('\n')
+                    f.write("sim:"+str(i+1) + '\n')
+                    for k in range(j+1, len(infile)):
+                        if infile[k][:3] == "sim":
+                            break
+                        f.write(infile[k] + '\n')
+                    break
+
+
         f.close()
     print("Results saved!")
 
@@ -619,8 +636,8 @@ def main_func():
         # plot configuration
         plt.xlim(start, end)
         plt.ylim(0,1)
-        plt.xlabel('Wavelength (um)',fontsize = label_font_size)
-        plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
+        plt.xlabel('Wavelength (\u03BCm)',fontsize = label_font_size)
+        plt.ylabel('Spectral Responce',fontsize = label_font_size)
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
         plt.savefig(str(output_name)+"_plot{}.png".format(i+1))
 
