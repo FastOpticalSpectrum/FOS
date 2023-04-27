@@ -8,6 +8,12 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 + Zherui Han: zrhan@purdue.edu
 + Xiulin Ruan:ruan@purdue.edu
 
+## How to download and use __`FOS`__
+There are two ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. This file can be downloaded through the latest release and may take a few seconds to load after opening.
+
+Alternatively, for other operating systems or for security reasons, one can use the Python source code in the src folder by simply running Main3.py. This was built in Python 3.10 and may or may not work in other versions. 
+
+If you have any questions, issues, or requests, please put them in the Discussions tab!
 
 ## Installing required packages
 
@@ -30,13 +36,6 @@ Install the required packages using conda:
 ```
 conda install --file requirements.txt
 ```
-
-## How to download and use __`FOS`__
-There are two ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. This file can be downloaded through the latest release and may take a few seconds to load after opening.
-
-Alternatively, for other operating systems or for security reasons, one can use the Python source code in the src folder by simply running Main3.py. This was built in Python 3.10 and may or may not work in other versions. 
-
-If you have any questions, issues, or requests, please put them in the Discussions tab!
 
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown in the example below, what is needed is:
