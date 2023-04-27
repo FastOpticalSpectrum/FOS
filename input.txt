@@ -13,7 +13,12 @@ Mesh: 0.5
 Solar: AM15.txt
 
 Photons: 30000
+# wavelength range in microns
+Start: 0.38
+End: 0.73
 
+### End header ###
+### Start body ###
 
 Sim: 1
 

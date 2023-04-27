@@ -134,7 +134,7 @@ def new_properties(particle2, medium2, plength, mlength, particle, medium, mesh)
     return particle2, medium2
 
 
-def interpolate(particle, medium, length, mesh_percentage):
+def interpolate(particle, medium, length, mesh_percentage, start, end):
     particle_spacing = zeros((length, 2, len(particle[:, 0, 0])))
     medium_spacing = zeros((length, 2, len(medium[:, 0, 0])))
 
@@ -148,7 +148,9 @@ def interpolate(particle, medium, length, mesh_percentage):
     plength, mlength = calc_length(particle, medium, plength, mlength, length)
 
     minimum, max, medium_spacing, particle_spacing = calc_spacing(particle, medium, particle_spacing, medium_spacing, minimum, max, length)
-
+    if start != 0 and end != 0:
+        minimum = start
+        max = end
 
     # combine them all to one
     min_spacing = zeros((2, 10000))

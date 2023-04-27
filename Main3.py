@@ -1,15 +1,13 @@
-from numpy import loadtxt, zeros, append, vstack, asarray, savetxt, dstack, round
+from numpy import loadtxt, zeros, append, vstack, asarray, savetxt, dstack, round, max
 from MieTheory3 import mie_theory, effective_medium, mie_theory_coreshell
 from MonteCarlo import main_mc
 from SolarIntegration import solar_spectrum
 import os.path
 from NN_feedforward import forward
 from interpolate import interpolate
-
-###### Ziqi's code, plot the results ######
 import matplotlib.pyplot as plt
-from numpy import max
-###### end of Ziqi's code ######
+
+
 
 
 
@@ -38,6 +36,32 @@ def check_file_exists(name, check):
     return check
 
 
+# checks to makes sure all material files are within the wavelength range given
+def check_material_wavelength_range(particle, medium, check, start, end):
+    if start == 0 and end == 0:
+        return check
+    # initialize the min and max values
+    min_wave = particle[0, 0, 0]
+    max_wave = max(particle[0, :, 0])
+    for i in range(1, len(particle[:, 0, 0])):
+        if particle[i, 0, 0] > min_wave:
+            min_wave = particle[i, 0, 0]
+        if max(particle[i, :, 0]) < max_wave:
+            max_wave = max(particle[i, :, 0])
+
+    for i in range(len(medium[:, 0, 0])):
+        if medium[i, 0, 0] > min_wave:
+            min_wave = medium[i, 0, 0]
+        if max(medium[i, :, 0]) < max_wave:
+            max_wave = max(medium[i, :, 0])
+    if start < min_wave or end > max_wave:
+        check = True
+        print('Wavelength range is not covered by all input materials')
+        print("Please re-enter input file once corrected.")
+        print("\n")
+    return check
+
+
 # imports information from header of input file and loads in necessary files
 def import_header(infile, check):
     # p is list of particle input file names, m for medium input files.
@@ -46,13 +70,17 @@ def import_header(infile, check):
     m = zeros(0, dtype=str)
     # solar spectrum file to import. If there is not one, this variable remains blank
     solar = ""
-    # ooutput file name
+    # output file name
     output_name = ""
     # mesh percentage, 1 keeps data as is. Above 1 increases the number of mesh points, below 1 decreases
     mesh_percentage = 1
 
     photons = 0
     line = 0
+
+    #initialize for later
+    start = end = 0
+
     # loops through header. Breaks loop when it hits the first "sim"
     for i in range(len(infile)):
         if infile[i][0:8] == "particle":
@@ -67,6 +95,10 @@ def import_header(infile, check):
             mesh_percentage = float(infile[i][5:])
         if infile[i][0:7] == "photons":
             photons = int(infile[i][8:])
+        if infile[i][0:5] == "start":
+            start = float(infile[i][6:])
+        if infile[i][0:3] == "end":
+            end = float(infile[i][4:])
         if infile[i][0:3] == "sim":
             line = i-1
             break
@@ -125,14 +157,14 @@ def import_header(infile, check):
                 if medium[i, j, 0] < (particle[0, j, 0] - 0.01) or medium[i, j, 0] > (particle[0, j, 0] + 0.01):
                     need_interp = True
 
-        # send to interpolation method if the wavelengths don't match or the mesh_percentage is not 1
-        if need_interp is True:
-            print('Interpolating properties to match wavelengths for each input')
-            particle, medium = interpolate(particle, medium, length, mesh_percentage)
-        elif mesh_percentage != 1:
-            print('Interpolating properties for new mesh')
-            particle, medium = interpolate(particle, medium, length, mesh_percentage)
-    return particle, medium, output_name, solar, sims, photons, line, check
+        check = check_material_wavelength_range(particle, medium, check, start, end)
+        if check == False:
+            # send to interpolation method if the wavelengths don't match or the mesh_percentage is not 1
+            if need_interp is True:
+                print('Interpolating properties')
+                particle, medium = interpolate(particle, medium, length, mesh_percentage, start, end)
+
+    return particle, medium, output_name, solar, sims, photons, line, check, start, end
 
 
 # checks to make sure the number of diameters matches the number of volume fraction inputs
@@ -476,7 +508,7 @@ def main_func():
         # if the file looks good so far, go ahead and import / run Mie theory
         if not check:
             # imports information from header of input file and loads in necessary files
-            particle, medium, output_name, solar, sims, photons, line, check = import_header(infile, check)
+            particle, medium, output_name, solar, sims, photons, line, check, start, end = import_header(infile, check)
             if not check:
                 # calculates optical properties from inputs in infile
                 prop, sims_per_medium, wavelengths, check = nanoparticle(infile, check, line, particle, medium)
@@ -566,48 +598,25 @@ def main_func():
         
         # plot the R, A, T
         plt.figure(figsize=figsize,dpi=dpi)
-        plt.plot(wavelengths, 100*R_results, label="R",color = 'black',linewidth = linewidth)
-        plt.plot(wavelengths, 100*A_results, label="A",color = 'red',linewidth = linewidth)
-        plt.plot(wavelengths, 100*T_results, label="T",color = 'blue',linewidth = linewidth)
+        plt.plot(wavelengths, R_results, label="R",color = 'black',linewidth = linewidth)
+        plt.plot(wavelengths, A_results, label="A",color = 'red',linewidth = linewidth)
+        plt.plot(wavelengths, T_results, label="T",color = 'blue',linewidth = linewidth)
 
         # plot the solar spectrum
         if solar != "":
             solar_arr = loadtxt(solar)
             plt.fill_between(solar_arr[:,0],
-                    100*solar_arr[:,1]/max(solar_arr[:,1]),
+                    solar_arr[:,1]/max(solar_arr[:,1]),
                     color='pink',
                     alpha=0.5)
             
         # plot configuration
-        plt.xlim(0.25,2.5)
-        plt.ylim(0,100)
+        plt.xlim(start, end)
+        plt.ylim(0,1)
         plt.xlabel('Wavelength (um)',fontsize = label_font_size)
         plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
         plt.savefig(str(output_name)+"_Spectral_Responce{}.png".format(i+1))
-
-
-        # plot the R, A, T in visible range
-        plt.figure(figsize=figsize,dpi=dpi)
-        plt.plot(wavelengths, 100*R_results, label="R",color = 'black',linewidth = linewidth)
-        plt.plot(wavelengths, 100*A_results, label="A",color = 'red',linewidth = linewidth)
-        plt.plot(wavelengths, 100*T_results, label="T",color = 'blue',linewidth = linewidth)
-
-        # plot the solar spectrum
-        if solar != "":
-            solar_arr = loadtxt(solar)
-            plt.fill_between(solar_arr[:,0],
-                    100*solar_arr[:,1]/max(solar_arr[:,1]),
-                    color='pink',
-                    alpha=0.5)
-            
-        # plot configuration
-        plt.xlim(0.36,0.83)
-        plt.ylim(0,100)
-        plt.xlabel('Wavelength (um)',fontsize = label_font_size)
-        plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
-        plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
-        plt.savefig(str(output_name)+"_VIS_Spectral_Responce{}.png".format(i+1))
 
     ###### end of Ziqi's code ######
     return
