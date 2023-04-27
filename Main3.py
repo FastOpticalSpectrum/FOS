@@ -162,7 +162,7 @@ def import_header(infile, check):
             # send to interpolation method if the wavelengths don't match or the mesh_percentage is not 1
             if need_interp is True:
                 print('Interpolating properties')
-                particle, medium = interpolate(particle, medium, length, mesh_percentage, start, end)
+                particle, medium, start, end = interpolate(particle, medium, length, mesh_percentage, start, end)
 
     return particle, medium, output_name, solar, sims, photons, line, check, start, end
 
