@@ -536,38 +536,44 @@ def main_func():
 
     # if solar spectrum is provided, integrate for solar reflectance
     if solar != "":
-        # solar reflectance value for each simulation
-        solar_r = zeros(sims)
-        # reflectance at each wavelength to be integrated with the solar spectrum
-        refl = zeros((len(wavelengths), 2))
-        # move wavelengths over to refl
-        refl[:, 0] = wavelengths
-        # loop through each simulation to calculate solar reflectance
-        for i in range(sims):
-            # add the specular and diffuse reflectance together for total reflectance
-            refl[:, 1] = (results[i*sims_per_medium:(i+1)*sims_per_medium, 0]+results[i*sims_per_medium:(i+1)*sims_per_medium, 1])
-            # send to function to integrate
-            solar_r[i] = solar_spectrum(solar, refl)
-        # save solar reflectance of each sim to output file
-        output_solar = str(output_name) + "_solar.txt"
-        with open(output_solar, 'w') as f:
-            for i in range(len(solar_r)):
-                f.write('Sim ' + str(i+1) + ": ")
-                f.write(str(round(solar_r[i], 4)))
-                f.write('\n')
-        f.close()
+        if start <= 0.28 and end >= 2.5:
+            # solar r, a, and t value for each simulation
+            solar_r = zeros(sims)
+            solar_a = zeros(sims)
+            solar_t = zeros(sims)
+            # reflectance at each wavelength to be integrated with the solar spectrum
+            refl = zeros((len(wavelengths), 2))
+            tra = zeros((len(wavelengths), 2))
+            # move wavelengths over to refl
+            refl[:, 0] = wavelengths
+            tra[:, 0] = wavelengths
+            # loop through each simulation to calculate solar reflectance
+            for i in range(sims):
+                # add the specular and diffuse reflectance together for total reflectance
+                refl[:, 1] = (results[i*sims_per_medium:(i+1)*sims_per_medium, 0]+results[i*sims_per_medium:(i+1)*sims_per_medium, 1])
+                tra[:, 1] = (results[i * sims_per_medium:(i + 1) * sims_per_medium, 3])
+                # send to function to integrate
+                solar_r[i], solar_a[i], solar_t[i] = solar_spectrum(solar, refl, tra)
+        else:
+            solar = ""
 
     # save output scripts
     length = int(len(results[:, 0])/sims)
     for i in range(sims):
         output_sim = str(output_name) + str(i+1) +".txt"
         with open(output_sim, 'w') as f:
-            f.write('Wavelength\tSpecular_R\tDiffuse_R\tA\tT')  # changed by Ziqi
+            f.write('Sim: ' + str(i+1) + '\n')
+            f.write('\n')
+            if solar != "":
+                f.write('Solar R: ' + str(abs(round(solar_r[i], 4))) + '\n')
+                f.write('Solar A: ' + str(abs(round(solar_a[i], 4))) + '\n')
+                f.write('Solar T: ' + str(abs(round(solar_t[i], 4))) + '\n')
+                f.write('\n')
+            f.write('Wavelength\tR\tA\tT')  # changed by Ziqi
             f.write('\n')
             for j in range(length):
                 f.write(str(round(wavelengths[j], 4)) + '\t')
-                f.write(str(round(results[j+length*i, 0], 4)) + '\t')
-                f.write(str(round(results[j + length * i, 1], 4)) + '\t')
+                f.write(str(round(results[j+length*i, 0]+results[j + length * i, 1], 4)) + '\t')
                 f.write(str(round(results[j + length * i, 2], 4)) + '\t')
                 f.write(str(round(results[j + length * i, 3], 4)) + '\t')
                 f.write('\n')
@@ -616,7 +622,7 @@ def main_func():
         plt.xlabel('Wavelength (um)',fontsize = label_font_size)
         plt.ylabel('Spectral Responce (%)',fontsize = label_font_size)
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
-        plt.savefig(str(output_name)+"_Spectral_Responce{}.png".format(i+1))
+        plt.savefig(str(output_name)+"_plot{}.png".format(i+1))
 
     ###### end of Ziqi's code ######
     return
