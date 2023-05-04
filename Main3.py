@@ -254,7 +254,8 @@ def optical(line, infile, particle, medium, check):
             wait = False
         elif infile[i][0:5] == "layer" and infile[i][5:] != "1":
             # check to make sure same number of diameters as volume fractions
-            check = check_diameters(current_sim, fv, sizes, check)
+            if coreshell is False:
+                check = check_diameters(current_sim, fv, sizes, check)
             layers += 1
             if coreshell is True:
                 check = check_dist(current_sim, dist, check)
@@ -272,7 +273,8 @@ def optical(line, infile, particle, medium, check):
         elif infile[i][0:3] == "sim" and infile[i][4:] != "1":
             current_sim = int(infile[i][4:])
             # check to make sure same number of diameters as volume fractions
-            check = check_diameters(current_sim, fv, sizes, check)
+            if coreshell is False:
+                check = check_diameters(current_sim, fv, sizes, check)
             if coreshell is True:
                 check = check_dist(current_sim, dist, check)
                 optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
