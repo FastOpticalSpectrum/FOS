@@ -571,7 +571,7 @@ def main_func():
                 f.write('Solar A: ' + str(abs(round(solar_a[i], 4))) + '\n')
                 f.write('Solar T: ' + str(abs(round(solar_t[i], 4))) + '\n')
                 f.write('\n')
-            f.write('Wavelength\tR\tA\tT')  # changed by Ziqi
+            f.write('Wavelength\tR\tA\tT')  
             f.write('\n')
             for j in range(length):
                 f.write(str(round(wavelengths[j], 4)) + '\t')
@@ -600,7 +600,7 @@ def main_func():
     print("Results saved!")
 
 
-    ###### Ziqi's code, plot the results ######
+    ###### plot the results ######
     # plot configuration
     plt.style.use('default')
     figsize = (10,8)
@@ -643,7 +643,7 @@ def main_func():
         plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
         plt.savefig(str(output_name)+"_plot{}.png".format(i+1))
 
-    ###### end of Ziqi's code ######
+    ###### end of plot the results ######
     return
 
 
