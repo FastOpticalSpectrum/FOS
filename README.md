@@ -17,7 +17,7 @@ If you have any questions, issues, or requests, please put them in the Discussio
 
 ## Installing required packages
 
-The `requirements.txt` file list all Python libraries that this project depend on, and they will be installed using:
+The `requirements.txt` file lists all Python libraries that this project depends on. If you are not using the executable file, they can be installed using:
 ```
 pip install -r requirements.txt
 ```
