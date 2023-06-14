@@ -1,3 +1,24 @@
+#  FOS: FOS, which means "light" in Greek, is used for Fast Optical Spectrum (FOS) calculations of nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
+#  Copyright (C) 2023 Daniel Carne <dcarne@purdue.edu>
+#  Copyright (C) 2023 Joseph Peoples <@gmail.com>
+#  Copyright (C) 2023 Ziqi Guo <wu.li.phys2011@gmail.com>
+#  Copyright (C) 2023 Dudong Feng <Tianli.Feng2011@gmail.com>
+#  Copyright (C) 2023 Zherui Han <zrhan@purdue.edu>
+#  Copyright (C) 2023 Xiulin Ruan <ruan@purdue.edu>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from numpy import amax, zeros, append, interp
 from numba import njit
 
@@ -134,7 +155,7 @@ def new_properties(particle2, medium2, plength, mlength, particle, medium, mesh)
     return particle2, medium2
 
 
-def interpolate(particle, medium, length, mesh_percentage):
+def interpolate(particle, medium, length, mesh_percentage, start, end):
     particle_spacing = zeros((length, 2, len(particle[:, 0, 0])))
     medium_spacing = zeros((length, 2, len(medium[:, 0, 0])))
 
@@ -148,7 +169,12 @@ def interpolate(particle, medium, length, mesh_percentage):
     plength, mlength = calc_length(particle, medium, plength, mlength, length)
 
     minimum, max, medium_spacing, particle_spacing = calc_spacing(particle, medium, particle_spacing, medium_spacing, minimum, max, length)
-
+    if start != 0 and end != 0:
+        minimum = start
+        max = end
+    else:
+        start = minimum
+        end = max
 
     # combine them all to one
     min_spacing = zeros((2, 10000))
@@ -163,4 +189,4 @@ def interpolate(particle, medium, length, mesh_percentage):
     medium2 = zeros((len(medium[:, 0, 0]), len(mesh), 3))
     particle2, medium2 = new_properties(particle2, medium2, plength, mlength, particle, medium, mesh)
 
-    return particle2, medium2
+    return particle2, medium2, start, end
