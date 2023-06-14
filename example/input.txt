@@ -8,7 +8,7 @@ Output: Test	# comments can also be inline next to input
 # import any materials you will use as particles or mediums
 # materials files need three coloumns, wavelength, refractive index, and extinction coefficient
 Particle 1: TiO2.txt
-Particle 2: Si.txt
+Particle 2: BaSO4.txt
 Medium 1: acr.txt
 Medium 2: air.txt
 
