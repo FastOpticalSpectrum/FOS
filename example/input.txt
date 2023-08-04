@@ -3,7 +3,7 @@ MC
 
 # hashtags comment a line out
 # output defines the prefix for output files
-Output: Test	# comments can also be inline next to input
+Output: test	# comments can also be inline next to input
 
 # import any materials you will use as particles or mediums
 # materials files need three coloumns, wavelength, refractive index, and extinction coefficient
