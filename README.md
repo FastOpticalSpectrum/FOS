@@ -99,7 +99,7 @@ Sim 1
 Upper: 1
 Lower: 1
 Layer 1
-Medium 1
+Matrix 1
 T: 100
 Particle 2
 D: 0.4
@@ -110,7 +110,7 @@ Sim 2
 Upper: 1
 Lower: 1
 Layer 1
-Medium 1
+Matrix 2
 T: 50
 Particle 1
 D: 0.4, 0.8
@@ -121,7 +121,7 @@ D: 0.5, 0.2
 VF: 20, 10
 Dist: 20
 Layer 2
-Medium 1
+Matrix 1
 T: 50
 Particle 1
 D: 0.5
