@@ -42,31 +42,45 @@ Each input file contains a header and a body. The header consists of information
 + Either "MC" or "NN" in the first line to specify Monte Carlo simulation or Neural Network prediction.
 + The output file prefix.
 + At least one particle .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
-+ At least one medium .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
++ At least one matrix .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
 + The mesh setting (defaults to 1 if not included).
 + The solar spectrum to integrate with the reflectance (not required).
 + The number of photons if running a Monte Carlo simulation.
++ The start and end wavelength to simulate.
 
 You can learn more about what each of these inputs mean in the appendix at the bottom.
 
 Example header:
 
 ```
-mc
+MC
+# MC for Monte-Carlo or NN for neural network, must be in the first line
 
-# a line starting with a hashtag comments it out
+# hashtags comment a line out
+# output defines the prefix for output files
+Output: test	# comments can also be inline next to input
 
-output: test
+# import any materials you will use as particles or matrixes
+# materials files need three coloumns, wavelength, refractive index, and extinction coefficient
+Particle 1: TiO2.txt
+Particle 2: BaSO4.txt
+Matrix 1: acr.txt
+Matrix 2: air.txt
 
-particle 1: BaSO4.txt
-particle 2: TiO2.txt
-medium 1: acrylic.txt
+# mesh allows you to control the density of wavelengths simulated
+# if mesh is not included, it will default to 1
+Mesh: 0.5
 
-mesh: 0.5
+# if solar is included, the output file will include the integrated solar response
+Solar: am15.txt
 
-solar: AM15.txt
+# number of photons per wavelength for Monte Carlo simulations
+Photons: 30000
 
-photons: 100000
+# wavelength range tested in microns
+# if this is left out, it will default to the broadest range all materials provide
+Start: 0.25
+End: 2.5
 ```
 
 The body of the input file consists of information for each simulation. An example body is shown below with one simple simulation, and one with more complex features. In each simulation, the following is required:
@@ -81,7 +95,7 @@ The body of the input file consists of information for each simulation. An examp
 
 Example body:
 ```
-Sim: 1
+Sim 1
 Upper: 1
 Lower: 1
 Layer 1
@@ -92,7 +106,7 @@ D: 0.4
 VF: 60
 Dist: 0
 
-Sim: 2
+Sim 2
 Upper: 1
 Lower: 1
 Layer 1
