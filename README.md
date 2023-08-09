@@ -48,8 +48,6 @@ Each input file contains a header and a body. The header consists of information
 + The number of photons if running a Monte Carlo simulation.
 + The start and end wavelength to simulate.
 
-You can learn more about what each of these inputs mean in the appendix at the bottom.
-
 Example header:
 
 ```
@@ -86,12 +84,12 @@ End: 2.5
 The body of the input file consists of information for each simulation. An example body is shown below with one simple simulation, and one with more complex features. In each simulation, the following is required:
 + Sequentially ordered simulation number (1, 2, 3, ..., n).
 + Upper and lower boundary condition refractive index, this number is applied to all wavelengths simulated.
-+ Within each simulation each layer must be labelled. Sim: 1 below only has one layer, Sim: 2 has 2 layers.
-+ Each layer must include at least one medium and one particle.
-+ The number next to medium or particle refer to the file imported from the header. For example, in Sim: 1 when it refers to Particle 2, that uses the TiO2.txt file which was imported in the header as Particle 2.
-+ Under medium, the layer thickness must be specified. All units in the input file are in microns.
-+ Under each particle, the diamater, volume fraction, and distribution must be specified. Multiple diameters can be provided under one particle such as in Sim: 2 layer 1
-+ Multiple particle types can be used within a layer such as in Sim: 2 Layer 1 by specifying the particles sequentially before beginning layer 2
++ Within each simulation each layer must be labelled. Sim 1 below only has one layer, Sim 2 has 2 layers.
++ Each layer must include at least one matrix and one particle.
++ The number next to medium or particle refer to the file imported from the header. For example, in Sim 1 when it refers to Particle 2, that uses the TiO2.txt file which was imported in the header as Particle 2.
++ Under matrix, the layer thickness must be specified. All units in the input file are in microns.
++ Under each particle, the diamater, volume fraction, and distribution must be specified. Multiple diameters can be provided under one particle such as in Sim 2 layer 1
++ Multiple particle types can be used within a layer such as in Sim 2 Layer 1 by specifying the particles sequentially before beginning layer 2
 
 Example body:
 ```
@@ -131,8 +129,5 @@ Dist: 45
 An example input file is provided (input.txt) in the example folder which shows examples of different simulation features.
 
 ## Output files
-There will be an output file generated for each simulation ran. Each file will be named the output file prefix followed by the simulation number. For example, using the above input file the output files would be test1.txt and test2.txt. Each of these files will have 5 columns, the wavelength, specular reflectance, diffuse reflectance, absortance, and transmittance.
+Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference.
 
-If a solar spectrum file is included in the input header, then there will be an additional file named the output prefix followed by \_solar,  test\_solar.txt in this example. This file includes the solar reflectance of each simulation.
-
-## Appendix
