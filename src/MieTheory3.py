@@ -1,7 +1,6 @@
-from numpy import loadtxt, zeros, abs, sum, exp, conj, pi, ceil, sqrt, imag, real, complex128
+from numpy import zeros, abs, sum, exp, conj, pi, ceil, sqrt, imag, real, complex128
 from scipy.special import jv, yv
 from numba import njit
-import time
 
 
 @njit()
