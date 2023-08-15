@@ -1,8 +1,8 @@
 #  FOS: FOS, which means "light" in Greek, is used for Fast Optical Spectrum (FOS) calculations of nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
 #  Copyright (C) 2023 Daniel Carne <dcarne@purdue.edu>
 #  Copyright (C) 2023 Joseph Peoples <@gmail.com>
-#  Copyright (C) 2023 Ziqi Guo <wu.li.phys2011@gmail.com>
-#  Copyright (C) 2023 Dudong Feng <Tianli.Feng2011@gmail.com>
+#  Copyright (C) 2023 Ziqi Guo <gziqi@purdue.edu>
+#  Copyright (C) 2023 Dudong Feng <feng376@purdue.edu>
 #  Copyright (C) 2023 Zherui Han <zrhan@purdue.edu>
 #  Copyright (C) 2023 Xiulin Ruan <ruan@purdue.edu>
 #
@@ -103,7 +103,7 @@ def import_header(infile, check):
     for i in range(len(infile)):
         if infile[i][0:8] == "particle":
             p = append(p, infile[i][10:])
-        if infile[i][0:6] == "medium":
+        if infile[i][0:6] == "matrix":
             m = append(m, infile[i][8:])
         if infile[i][0:6] == "output":
             output_name = infile[i][7:]
@@ -237,13 +237,13 @@ def optical(line, infile, particle, medium, check):
             # holds previous ptype for core shell
             if count > 1:
                 ptypeCore = ptype
-            ptype = int(infile[i][8])
+            ptype = int(infile[i][8:])
         if infile[i][0:5] == "upper":
             upper = float(infile[i][6:])
         elif infile[i][0:5] == "lower":
             lower = float(infile[i][6:])
-        elif infile[i][0:6] == "medium":
-            mtype = int(infile[i][6])
+        elif infile[i][0:6] == "matrix":
+            mtype = int(infile[i][6:])
         elif infile[i][0:2] == "t:":
             thickness = float(infile[i][2:])
             thickness = thickness / 10000
@@ -288,8 +288,8 @@ def optical(line, infile, particle, medium, check):
             vol_frac_sum = 0
             optics_sum = zeros((5, len(particle[0, :, 0])))
             count = 0
-        elif infile[i][0:3] == "sim" and infile[i][4:] != "1":
-            current_sim = int(infile[i][4:])
+        elif infile[i][0:3] == "sim" and infile[i][3:] != "1":
+            current_sim = int(infile[i][3:])
             # check to make sure same number of diameters as volume fractions
             if coreshell is False:
                 check = check_diameters(current_sim, fv, sizes, check)
@@ -401,11 +401,11 @@ def check_for_word_in_sim(infile, word, statement, check):
     sim_number = str(1)
     word_size = len(word)
     for i in range(start_line, len(infile)):
-        if (infile[i][:3] == "sim" and infile[i][4:] != '1'):
+        if (infile[i][:3] == "sim" and infile[i][3:] != '1'):
 
             if word_present == 1:
                 check = True
-                print("Sim:" + sim_number + " must have " + statement)
+                print("Sim" + sim_number + " must have " + statement)
             sim_number = infile[i][4:]
             word_present = 1
         if infile[i][:word_size] == word:
@@ -413,8 +413,32 @@ def check_for_word_in_sim(infile, word, statement, check):
     if word_present == 1:
         check = True
         if statement != '':
-            print("Sim:" + sim_number + " must have " + statement)
+            print("Sim" + sim_number + " must have " + statement)
     return check
+
+
+# check that the matrix and particle numbers are correct
+def check_number_order(infile, check):
+    current_matrix_num = 1
+    current_particle_num = 1
+    for i in range(len(infile)):
+        if infile[i][:8] == 'particle':
+            if int(infile[i][8]) != current_particle_num:
+                check = True
+                print("Particles in header must be labelled 1, 2, 3, ...")
+            else:
+                current_particle_num += 1
+        if infile[i][:6] == 'matrix':
+            if int(infile[i][6]) != current_matrix_num:
+                check = True
+                print("Matrixes in header must be labelled 1, 2, 3, ...")
+            else:
+                current_matrix_num += 1
+        # break loop once the first sim starts, this only checks the header
+        if infile[i][:3] == "sim":
+            break
+    return check
+
 
 # check the input file for errors
 def check_input_for_errors(infile):
@@ -446,7 +470,7 @@ def check_input_for_errors(infile):
         if infile[i][:8] == 'particle' and infile[i][10:] != '':
             particle = 1
         # at least one medium
-        if infile[i][:6] == 'medium' and infile[i][8:] != '':
+        if infile[i][:6] == 'matrix' and infile[i][8:] != '':
             medium = 1
         # number of photons if using Monte Carlo
         if infile[0] == "mc":
@@ -474,6 +498,9 @@ def check_input_for_errors(infile):
         check = True
         print("Number of photons must be specified")
 
+    # make sure matrixes and particles are numbered accordingly
+    check = check_number_order(infile, check)
+
     ### check for errors in the body of the file
     # make sure each sim is numbered correctly
     sim_number_should_be = 1
@@ -481,13 +508,13 @@ def check_input_for_errors(infile):
     sim_number_error = 1
     for i in range(len(infile)):
         if infile[i][:3] == "sim":
-            if infile[i][4:] != str(sim_number_should_be):
+            if infile[i][3:] != str(sim_number_should_be):
                 sim_number_error = 0
 
             sim_number_should_be += 1
     if sim_number_error == 0:
         check = True
-        print("Error in simulation numbers. Make sure they are labeled Sim: 1, Sim: 2, etc.")
+        print("Error in simulation numbers. Make sure they are labeled Sim 1, Sim 2, etc.")
 
     # check for upper boundary condition
     check = check_for_word_in_sim(infile, 'upper', 'defined upper boundary condition', check)
@@ -496,7 +523,7 @@ def check_input_for_errors(infile):
     # check for at least one layer
     check = check_for_word_in_sim(infile, 'layer', 'at least one defined layer', check)
     # check for at least one medium
-    check = check_for_word_in_sim(infile, 'medium', 'at least one medium', check)
+    check = check_for_word_in_sim(infile, 'matrix', 'at least one matrix', check)
     # check for medium thickness
     check = check_for_word_in_sim(infile, 't:', 'a defined thickness', check)
     # check for at least one particle
@@ -582,7 +609,7 @@ def main_func():
     for i in range(sims):
         output_sim = str(output_name) + str(i+1) +".txt"
         with open(output_sim, 'w') as f:
-            f.write('Sim: ' + str(i+1) + '\n')
+            f.write('Sim ' + str(i+1) + '\n')
             f.write('\n')
             if solar != "":
                 f.write('Solar R: ' + str(abs(round(solar_r[i], 4))) + '\n')
@@ -604,9 +631,9 @@ def main_func():
                     break
                 f.write(infile[j] + '\n')
             for j in range(len(infile)):
-                if infile[j][:] == "sim:"+str(i+1):
+                if infile[j][:] == "sim"+str(i+1):
                     f.write('\n')
-                    f.write("sim:"+str(i+1) + '\n')
+                    f.write("sim"+str(i+1) + '\n')
                     for k in range(j+1, len(infile)):
                         if infile[k][:3] == "sim":
                             break
