@@ -50,8 +50,17 @@ def check_file_exists(name, check):
         print("File " + name + " does not exist in this directory.")
         print("Please re-enter input file once corrected.")
         print("\n")
-
     return check
+
+
+# returns a number before a colon, to allow for multi-digit numbers
+def get_number(string):
+    number = 0
+    for i in range(len(string)):
+        if string[i] == ':':
+            number = string[:i]
+            break
+    return number, len(number)
 
 
 # checks to makes sure all material files are within the wavelength range given
@@ -82,10 +91,13 @@ def check_material_wavelength_range(particle, medium, check, start, end):
 
 # imports information from header of input file and loads in necessary files
 def import_header(infile, check):
-    # p is list of particle input file names, m for medium input files.
+    # p is list of particle input file names, m for matrix input files.
     # each of these files consists of three columns, wavelength, refractive index, and extinction coefficient
     p = zeros(0, dtype=str)
     m = zeros(0, dtype=str)
+    # contains the number tied to each particle and matrix
+    p_num = zeros(0, dtype=str)
+    m_num = zeros(0, dtype=str)
     # solar spectrum file to import. If there is not one, this variable remains blank
     solar = ""
     # output file name
@@ -93,18 +105,21 @@ def import_header(infile, check):
     # mesh percentage, 1 keeps data as is. Above 1 increases the number of mesh points, below 1 decreases
     mesh_percentage = 1
 
-    photons = 0
-    line = 0
-
     #initialize for later
     start = end = 0
+    photons = 0
+    line = 0
 
     # loops through header. Breaks loop when it hits the first "sim"
     for i in range(len(infile)):
         if infile[i][0:8] == "particle":
-            p = append(p, infile[i][10:])
+            num, length = get_number(infile[i][8:])
+            p_num = append(p_num, num)
+            p = append(p, infile[i][(9+length):])
         if infile[i][0:6] == "matrix":
-            m = append(m, infile[i][8:])
+            num, length = get_number(infile[i][6:])
+            m_num = append(m_num, num)
+            m = append(m, infile[i][7+length:])
         if infile[i][0:6] == "output":
             output_name = infile[i][7:]
         if infile[i][0:5] == "solar":
@@ -182,7 +197,7 @@ def import_header(infile, check):
                 print('Interpolating properties')
                 particle, medium, start, end = interpolate(particle, medium, length, mesh_percentage, start, end)
 
-    return particle, medium, output_name, solar, sims, photons, line, check, start, end
+    return particle, medium, output_name, solar, sims, photons, line, check, start, end, p_num, m_num
 
 
 # checks to make sure the number of diameters matches the number of volume fraction inputs
@@ -204,8 +219,23 @@ def check_dist(current_sim, dist, check):
     return check
 
 
+# gets index referring to each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+def get_index(number, type, p_num, m_num):
+    if type == 'p':
+        for i in range(len(p_num)):
+            if int(p_num[i]) == number:
+                index = i
+                break
+    elif type == 'm':
+        for i in range(len(m_num)):
+            if int(m_num[i]) == number:
+                index = i
+                break
+    return index
+
+
 # finds info from input and sends to Mie Theory to calculate optical properties
-def optical(line, infile, particle, medium, check):
+def optical(line, infile, particle, medium, check, p_num, m_num):
     print("Running Mie theory")
     # array of optical properties to send to Monte Carlo
     prop = zeros((0, 5))
@@ -228,10 +258,17 @@ def optical(line, infile, particle, medium, check):
                 if coreshell is True:
                     if wait is False:
                         check = check_dist(current_sim, dist, check)
-                        optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                        # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+                        ptypeCore_in = get_index(ptypeCore, 'p', p_num, m_num)
+                        ptype_in = get_index(ptype, 'p', p_num, m_num)
+                        mtype_in = get_index(mtype, 'm', p_num, m_num)
+                        optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore_in), :, :], particle[int(ptype_in), :, :], medium[int(mtype_in), :, :], thickness, dist)
                         optics_sum += optics
                 else:
-                    optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                    # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+                    ptype_in = get_index(ptype, 'p', p_num, m_num)
+                    mtype_in = get_index(mtype, 'm', p_num, m_num)
+                    optics = mie_theory(sizes, fv, particle[int(ptype_in), :, :], medium[int(mtype_in), :, :], thickness, dist)
                     optics_sum += optics
             count += 1
             # holds previous ptype for core shell
@@ -277,13 +314,22 @@ def optical(line, infile, particle, medium, check):
             layers += 1
             if coreshell is True:
                 check = check_dist(current_sim, dist, check)
-                optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+                ptypeCore_in = get_index(ptypeCore, 'p', p_num, m_num)
+                ptype_in = get_index(ptype, 'p', p_num, m_num)
+                mtype_in = get_index(mtype, 'm', p_num, m_num)
+                optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore_in - 1), :, :], particle[int(ptype_in - 1), :, :], medium[int(mtype_in - 1), :, :], thickness, dist)
             else:
-                optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+                ptype_in = get_index(ptype, 'p', p_num, m_num)
+                mtype_in = get_index(mtype, 'm', p_num, m_num)
+                optics = mie_theory(sizes, fv, particle[int(ptype_in - 1), :, :], medium[int(mtype_in - 1), :, :], thickness, dist)
             optics_sum += optics
             optics_sum[0, :] = optics[0, :]
             optics_sum[4, :] = optics[4, :]
-            optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype - 1), :, :])
+            # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+            mtype_in = get_index(mtype, 'm', p_num, m_num)
+            optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype_in - 1), :, :])
             optical_per_layer = dstack((optical_per_layer, optics_sum))
             vol_frac_sum = 0
             optics_sum = zeros((5, len(particle[0, :, 0])))
@@ -295,13 +341,21 @@ def optical(line, infile, particle, medium, check):
                 check = check_diameters(current_sim, fv, sizes, check)
             if coreshell is True:
                 check = check_dist(current_sim, dist, check)
-                optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+                ptypeCore_in = get_index(ptypeCore, 'p', p_num, m_num)
+                ptype_in = get_index(ptype, 'p', p_num, m_num)
+                mtype_in = get_index(mtype, 'm', p_num, m_num)
+                optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore_in - 1), :, :], particle[int(ptype_in - 1), :, :], medium[int(mtype_in - 1), :, :], thickness, dist)
             else:
-                optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+                # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+                ptype_in = get_index(ptype, 'p', p_num, m_num)
+                mtype_in = get_index(mtype, 'm', p_num, m_num)
+                optics = mie_theory(sizes, fv, particle[int(ptype_in - 1), :, :], medium[int(mtype_in - 1), :, :], thickness, dist)
             optics_sum += optics
             optics_sum[0, :] = optics[0, :]
             optics_sum[4, :] = optics[4, :]
-            optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype - 1), :, :])
+            mtype_in = get_index(mtype, 'm', p_num, m_num)
+            optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype_in - 1), :, :])
             optical_per_layer = dstack((optical_per_layer, optics_sum))
             for j in range(len(particle[0, :, 0])):
                 prop = vstack((prop, [upper, 0, 0, 0, 0]))
@@ -319,13 +373,21 @@ def optical(line, infile, particle, medium, check):
         check = check_diameters(current_sim, fv, sizes, check)
     if coreshell is True:
         check = check_dist(current_sim, dist, check)
-        optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore - 1), :, :], particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+        # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+        ptypeCore_in = get_index(ptypeCore, 'p', p_num, m_num)
+        ptype_in = get_index(ptype, 'p', p_num, m_num)
+        mtype_in = get_index(mtype, 'm', p_num, m_num)
+        optics = mie_theory_coreshell(core, shell, fv, particle[int(ptypeCore_in - 1), :, :], particle[int(ptype_in - 1), :, :], medium[int(mtype_in - 1), :, :], thickness, dist)
     else:
-        optics = mie_theory(sizes, fv, particle[int(ptype - 1), :, :], medium[int(mtype - 1), :, :], thickness, dist)
+        # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
+        ptype_in = get_index(ptype, 'p', p_num, m_num)
+        mtype_in = get_index(mtype, 'm', p_num, m_num)
+        optics = mie_theory(sizes, fv, particle[int(ptype_in - 1), :, :], medium[int(mtype_in - 1), :, :], thickness, dist)
     optics_sum += optics
     optics_sum[0, :] = optics[0, :]
     optics_sum[4, :] = optics[4, :]
-    optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype - 1), :, :])
+    mtype_in = get_index(mtype, 'm', p_num, m_num)
+    optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype_in - 1), :, :])
     optical_per_layer = dstack((optical_per_layer, optics_sum))
     for j in range(len(particle[0, :, 0])):
         prop = vstack((prop, [upper, 0, 0, 0, 0]))
@@ -337,9 +399,9 @@ def optical(line, infile, particle, medium, check):
 
 
 # breaks down import file, runs Mie Theory calculations
-def nanoparticle(infile, check, line, particle, medium):
+def nanoparticle(infile, check, line, particle, medium, p_num, m_num):
     # gets optical properties of each simulation
-    prop, check = optical(line, infile, particle, medium, check)
+    prop, check = optical(line, infile, particle, medium, check, p_num, m_num)
     sims_per_medium = len(particle[0, :, 0])
     wavelengths = particle[0, :, 0]
 
@@ -417,29 +479,6 @@ def check_for_word_in_sim(infile, word, statement, check):
     return check
 
 
-# check that the matrix and particle numbers are correct
-def check_number_order(infile, check):
-    current_matrix_num = 1
-    current_particle_num = 1
-    for i in range(len(infile)):
-        if infile[i][:8] == 'particle':
-            if int(infile[i][8]) != current_particle_num:
-                check = True
-                print("Particles in header must be labelled 1, 2, 3, ...")
-            else:
-                current_particle_num += 1
-        if infile[i][:6] == 'matrix':
-            if int(infile[i][6]) != current_matrix_num:
-                check = True
-                print("Matrixes in header must be labelled 1, 2, 3, ...")
-            else:
-                current_matrix_num += 1
-        # break loop once the first sim starts, this only checks the header
-        if infile[i][:3] == "sim":
-            break
-    return check
-
-
 # check the input file for errors
 def check_input_for_errors(infile):
     # check = True is there is an issue caught with the input file, otherwise false
@@ -498,8 +537,6 @@ def check_input_for_errors(infile):
         check = True
         print("Number of photons must be specified")
 
-    # make sure matrixes and particles are numbered accordingly
-    check = check_number_order(infile, check)
 
     ### check for errors in the body of the file
     # make sure each sim is numbered correctly
@@ -555,10 +592,10 @@ def main_func():
         # if the file looks good so far, go ahead and import / run Mie theory
         if not check:
             # imports information from header of input file and loads in necessary files
-            particle, medium, output_name, solar, sims, photons, line, check, start, end = import_header(infile, check)
+            particle, medium, output_name, solar, sims, photons, line, check, start, end, p_num, m_num = import_header(infile, check)
             if not check:
                 # calculates optical properties from inputs in infile
-                prop, sims_per_medium, wavelengths, check = nanoparticle(infile, check, line, particle, medium)
+                prop, sims_per_medium, wavelengths, check = nanoparticle(infile, check, line, particle, medium, p_num, m_num)
                 # if nn, check the properties are within range
                 if infile[0] == "nn":
                     check = check_NN_range(prop, check)
