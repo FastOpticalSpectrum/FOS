@@ -89,6 +89,19 @@ def check_material_wavelength_range(particle, medium, check, start, end):
     return check
 
 
+# makes sure the particle or matrix number exists in the header
+def check_num_exists(num, p_num, check, type):
+    local_check = 1
+    for i in range(len(p_num)):
+        if num == int(p_num[i]):
+            local_check = 0
+    if local_check == 1:
+        print(type + ' ' + str(num) + ' ' + 'does not exist in the header.')
+        print("Please re-enter input file once corrected.")
+        print("\n")
+        check = True
+    return check
+
 # imports information from header of input file and loads in necessary files
 def import_header(infile, check):
     # p is list of particle input file names, m for matrix input files.
@@ -136,11 +149,17 @@ def import_header(infile, check):
             line = i-1
             break
 
-    # counts number of simulations
+    # counts number of simulations and makes sure each particle and matrix exists
     sims = 0
-    for i in range(len(infile)):
+    for i in range(line, len(infile)):
         if infile[i][0:3] == "sim":
             sims += 1
+        if infile[i][0:8] == "particle":
+            particle_num = int(infile[i][8:])
+            check = check_num_exists(particle_num, p_num, check, 'Particle')
+        if infile[i][0:6] == "matrix":
+            matrix_num = int(infile[i][6:])
+            check = check_num_exists(matrix_num, m_num, check, 'Matrix')
 
     # length is the length (number of wavelength datapoints) of the longest input file
     length = 0
