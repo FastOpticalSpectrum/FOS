@@ -213,7 +213,7 @@ def check_diameters(current_sim, fv, sizes, check):
 def check_dist(current_sim, dist, check):
     # check to make sure same number of diameters and volume fraction
     if dist != 0:
-        print('Dist must be 0 for core shell simulations', current_sim)
+        print('Dist must be 0 for core shell sim', current_sim)
         print("Please re-enter input file once corrected.")
         check = True
     return check
@@ -368,6 +368,8 @@ def optical(line, infile, particle, medium, check, p_num, m_num):
             optical_per_layer = zeros((5, len(particle[0, :, 0]), 0))
             layers = 1
             count = 0
+            # reset default dist to 0
+            dist = 0
     # check to make sure same number of diameters as volume fractions
     if coreshell is False:
         check = check_diameters(current_sim, fv, sizes, check)
