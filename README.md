@@ -139,4 +139,3 @@ Two output files will be generated per simulation, one with data about the simul
 | MC/NN | Header   | -   | Either MC or NN must be specified in the first line for Monte Carlo or Neural Network   |
 | :---:   | :---: | :---: |
 | D | Body   | micron   | Particle diameter   |
-| :---:   | :---: | :---: |
