@@ -134,12 +134,8 @@ An example input file is provided (main_example/input.txt) in the examples folde
 Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference.
 
 ## Dictionary
-| Item | Location    | Units    | Units    |
-| :---:   | :---: | :---: | :---: |
-| Seconds | 301   | 283   | Units    |
-| Seconds | 301   | 283   | Units    |
 
 | Item | Location    | Units    | Description    |
 | :---:   | :---: | :---: | :---: |
-| MC/NN | Header   | NA   | Either MC or NN must be specified in the first line for Monte Carlo or Neural Network   |
+| MC/NN | Header   | -   | Either MC or NN must be specified in the first line for Monte Carlo or Neural Network   |
 | D | Body   | micron   | Particle diameter   |
