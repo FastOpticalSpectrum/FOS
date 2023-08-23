@@ -137,11 +137,9 @@ Two output files will be generated per simulation, one with data about the simul
 | Attempt | #1    | #2    |
 | :---:   | :---: | :---: |
 | Seconds | 301   | 283   |
-| :---:   | :---: | :---: |
 | Seconds | 301   | 283   |
 
 | Item | Location    | Units    | Description    |
 | :---:   | :---: | :---: |
 | MC/NN | Header   | NA   | Either MC or NN must be specified in the first line for Monte Carlo or Neural Network   |
-| :---:   | :---: | :---: |
 | D | Body   | micron   | Particle diameter   |
