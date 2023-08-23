@@ -133,3 +133,8 @@ An example input file is provided (main_example/input.txt) in the examples folde
 ## Output files
 Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference.
 
+## Dictionary
+| Attempt | #1    | #2    |
+| :---:   | :---: | :---: |
+| Seconds | 301   | 283   |
+
