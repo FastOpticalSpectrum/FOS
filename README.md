@@ -40,7 +40,7 @@ conda install --file requirements.txt
 ```
 
 ## Input file
-Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. As shown in the example below, what is needed is:
+Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. It is highly encouraged to view the example input files. As shown in the example below, what is needed is:
 + Either "MC" or "NN" in the first line to specify Monte Carlo simulation or Neural Network prediction.
 + The output file prefix.
 + At least one particle .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
