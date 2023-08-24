@@ -157,5 +157,5 @@ Two output files will be generated per simulation, one with data about the simul
 | C: | Body   | μm    | Particle core diameter, must have core diameter set for each core-shell particle (not solid).    |
 | S: | Body   | μm    | Particle shell wall thickness, must have shell wall thickness set for each core-shell particle (not solid).    |
 | VF: | Body   | -    | Particle volume fraction, must set for each particle.   |
-| Dist: | Body   | -    | Particle size distribution, if not included defaults to 0. Only applicable for solid particles, does not work for core-shell particles. Dist: 45 would refer to a +/- 45% particle size distribution, where 45% is two times the standard deviation.   |
+| Dist: | Body   | -    | Particle size distribution, defaults to 0 if not included. Only applicable for solid particles, does not work for core-shell particles. Dist: 45 would refer to a +/- 45% particle size distribution, where 45% is two times the standard deviation.   |
 
