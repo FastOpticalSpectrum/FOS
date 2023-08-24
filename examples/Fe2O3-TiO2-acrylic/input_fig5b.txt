@@ -1,0 +1,58 @@
+MC
+Output: fig5b
+Particle 1: fe2o3.txt
+Particle 2: tio2.txt
+Matrix 1: acr.txt
+Mesh: 1
+Solar: AM15.txt
+Photons: 100000
+start = 0.25
+end = 2.5
+
+Sim 1
+Upper: 1
+Lower: 1
+Layer 1
+Matrix 1
+T: 50
+Particle 1
+D: 0.05
+VF: 0.5
+Layer 2
+Matrix 1
+T: 300
+Particle 2
+D: 0.4
+VF: 60
+
+Sim 2
+Upper: 1
+Lower: 1
+Layer 1
+Matrix 1
+T: 100
+Particle 1
+D: 0.05
+VF: 0.5
+Layer 2
+Matrix 1
+T: 300
+Particle 2
+D: 0.4
+VF: 60
+
+Sim 3
+Upper: 1
+Lower: 1
+Layer 1
+Matrix 1
+T: 200
+Particle 1
+D: 0.05
+VF: 0.5
+Layer 2
+Matrix 1
+T: 300
+Particle 2
+D: 0.4
+VF: 60
