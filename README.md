@@ -2,7 +2,7 @@
 __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS`) calculations for nanoparticle media by combining Mie theory with either Monte Carlo simulations or a pre-trained deep neural network.
 ## Authors and References
 + Daniel Carne: dcarne@purdue.edu
-+ Joseph Peoples: 
++ Joseph Peoples: peoplesj@purdue.edu
 + Ziqi Guo: gziqi@purdue.edu
 + Dudong Feng: feng376@purdue.edu
 + Zherui Han: zrhan@purdue.edu
