@@ -136,7 +136,7 @@ Two output files will be generated per simulation, one with data about the simul
 ## Dictionary
 
 | Item  | Location    | Units    | Description    |
-| :----:   | :---: | :---: | :---: |
+| :---:   | :---: | :---: | :---: |
 | MC/NN | Header   | -   | Either MC or NN must be specified in the first line for Monte Carlo or Neural Network.   |
 | Output: | Header   | -   | Output file prefix.   |
 | Particle 3: | Header   | μm   | .txt materials file for a particulate material with n and k, each particle can be specified by any integer (3 in this case). The wavelength units in the material file must be in microns.   |
@@ -157,5 +157,5 @@ Two output files will be generated per simulation, one with data about the simul
 | C: | Body   | μm    | Particle core diameter, must have core diameter set for each core-shell particle (not solid).    |
 | S: | Body   | μm    | Particle shell wall thickness, must have shell wall thickness set for each core-shell particle (not solid).    |
 | VF: | Body   | -    | Particle volume fraction, must set for each particle.   |
-| Dist: | Body   | -    | Particle size distribution, if not included defaults to 0. Only applicable for solid particles, does not work for core-shell particles. Dist: 45 would refer to a +/- 45% particle size distribution, where 45% is two times the standard deviation   |
+| Dist: | Body   | -    | Particle size distribution, if not included defaults to 0. Only applicable for solid particles, does not work for core-shell particles. Dist: 45 would refer to a +/- 45% particle size distribution, where 45% is two times the standard deviation.   |
 
