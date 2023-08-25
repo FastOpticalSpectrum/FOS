@@ -10,9 +10,6 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 
 Cite: 
 
-## Video tutorial
-[![FOS video tutorial](https://i.imgur.com/FgmoT5N.png)](https://www.youtube.com/watch?v=fCwUsdP4lq8 "FOS tutorial")
-
 ## How to download and use __`FOS`__
 There are two ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. This file can be downloaded through the latest release and may take a few seconds to load after opening.
 
@@ -135,6 +132,9 @@ An example input file is provided (main_example/input.txt) in the examples folde
 
 ## Output files
 Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference.
+
+## Video tutorial
+[![FOS video tutorial](https://i.imgur.com/FgmoT5N.png)](https://www.youtube.com/watch?v=fCwUsdP4lq8 "FOS tutorial")
 
 ## Dictionary
 
