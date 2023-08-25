@@ -11,7 +11,7 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 Cite: 
 
 ## Video tutorial
-[![Everything Is AWESOME](https://imgur.com/a/Q6IhAI9)](https://www.youtube.com/watch?v=fCwUsdP4lq8 "Everything Is AWESOME")
+[![](https://imgur.com/a/Q6IhAI9)](https://www.youtube.com/watch?v=fCwUsdP4lq8 "Everything Is AWESOME")
 
 ## How to download and use __`FOS`__
 There are two ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. This file can be downloaded through the latest release and may take a few seconds to load after opening.
