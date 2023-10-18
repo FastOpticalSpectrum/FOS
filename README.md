@@ -131,7 +131,7 @@ Dist: 45
 An example input file is provided (main_example/input.txt) in the examples folder which shows examples of different simulation features.
 
 ## Output files
-Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response and scattering properties at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference. All units in the input and output files are in microns.
+Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response and scattering properties (of each layer) at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference. All units in the input and output files are in microns.
 
 ## Video tutorial
 [![FOS video tutorial](https://i.imgur.com/FgmoT5N.png)](https://www.youtube.com/watch?v=fCwUsdP4lq8 "FOS tutorial")
