@@ -133,7 +133,7 @@ VF: 30
 
 ## this is an example of using pre-calculated particle properties
 # the diameter is not required here. If a diameter is provided, FOS will ignore it.
-Sim 5
+Sim 6
 Upper: 1
 Lower: 1
 Layer 1
