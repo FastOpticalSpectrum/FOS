@@ -43,7 +43,7 @@ conda install --file requirements.txt
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. It is highly encouraged to view the example input files. Under the examples folder, the "main_example" input file contains simulations with many different examples including multiple layers, multiple particle types, inputting custom properties, core-shell particles, etc. As shown in the example below, what is needed is:
 + Either "MC" or "NN" in the first line to specify Monte Carlo simulation or Neural Network prediction.
 + The output file prefix.
-+ At least one particle .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
++ At least one particle .txt file with either the complex refractive index or pre-calculated scattering properties.
 + At least one matrix .txt file with three columns, the wavelength (in microns), refractive index, and extinction coefficient.
 + The mesh setting (defaults to 1 if not included).
 + The solar spectrum to integrate with the reflectance (not required).
