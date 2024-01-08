@@ -133,6 +133,8 @@ VF: 30
 
 ## this is an example of using pre-calculated particle properties
 # the diameter is not required here. If a diameter is provided, FOS will ignore it.
+# the custom properties file includes the wavelength, absorption coefficient, scattering coefficient, and asymmetry parameter, with base units in microns
+# the VF is included to accoount for dependent scattering, but it does not adjust the absorption or scattering coefficient
 Sim 6
 Upper: 1
 Lower: 1
