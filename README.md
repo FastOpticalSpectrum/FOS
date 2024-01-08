@@ -49,6 +49,7 @@ Each input file contains a header and a body. The header consists of information
 + The solar spectrum to integrate with the reflectance (not required).
 + The number of photons if running a Monte Carlo simulation.
 + The start and end wavelength to simulate.
++ Custom optical properties can be used (look at the example in main_example)
 
 Example header:
 
@@ -92,7 +93,6 @@ The body of the input file consists of information for each simulation. An examp
 + Under matrix, the layer thickness must be specified. All units in the input file are in microns.
 + Under each particle, the diamater, volume fraction, and distribution must be specified. Multiple diameters can be provided under one particle such as in Sim 2 layer 1
 + Multiple particle types can be used within a layer such as in Sim 2 Layer 1 by specifying the particles sequentially before beginning layer 2
-+ Custom optical properties can be used (look at the example in main_example)
 
 Example body:
 ```
