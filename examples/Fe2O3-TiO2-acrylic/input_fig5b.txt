@@ -32,7 +32,7 @@ Layer 1
 Matrix 1
 T: 100
 Particle 1
-D: 0.05
+D: 0.1
 VF: 0.5
 Layer 2
 Matrix 1
@@ -48,7 +48,7 @@ Layer 1
 Matrix 1
 T: 200
 Particle 1
-D: 0.05
+D: 0.2
 VF: 0.5
 Layer 2
 Matrix 1
