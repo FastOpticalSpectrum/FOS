@@ -62,7 +62,7 @@ MC
 Output: test	# comments can also be inline next to input
 
 # import any materials you will use as particles or matrixes
-# materials files need three coloumns, wavelength [microns], refractive index, and extinction coefficient
+# materials files need three columns, wavelength [microns], refractive index, and extinction coefficient
 Particle 1: TiO2.txt 
 Particle 2: BaSO4.txt
 Matrix 1: acr.txt
