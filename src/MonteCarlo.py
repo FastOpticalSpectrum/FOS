@@ -20,7 +20,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from numpy import zeros, random, pi, cos, log, vstack
-from numba import njit, prange, get_num_threads, set_num_threads
+from numba import njit, prange
 
 
 # specular reflectance at the top layer
