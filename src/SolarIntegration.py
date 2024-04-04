@@ -27,7 +27,7 @@ def solar_spectrum(solar, r, t):
     max_lambda = min(solar[-1, 0], r[-1, 0])
 
     # find minimum wavelength delta
-    d_lambda = min(min(solar[1:, 0] - solar[:-1, 0]), min(r[1:, 0] - r[:-1, 0]))
+    d_lambda = max(min(min(solar[1:, 0] - solar[:-1, 0]), min(r[1:, 0] - r[:-1, 0])), 0.00001)
 
     # interpolate to match wavelengths and proper delta
     num_indices = int(ceil((max_lambda-min_lambda)/d_lambda))

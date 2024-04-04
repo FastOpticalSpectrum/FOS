@@ -33,7 +33,7 @@ def distribution(r, fv, dist):
     half = (num_part - 1) / 2
     for i in range(len(r)):
         mean = r[i] * 2
-        std = mean * dist / 2
+        std = dist
         for j in range(num_part):
             var = abs(2 - 2 * (j / half))
             temp[j] = (1 / std) * exp(-0.5 * (var ** 2))
@@ -383,14 +383,13 @@ def mie_theory_coreshell(r1, s1, fv1, paint_core, paint_shell, acr, thickness, d
         prop[3, i] = asy
         prop[4, i] = thickness
 
-
     return prop
 
 
 
 
 @njit()
-def effective_medium(optics_sum, vol_frac_sum, acr):
+def effective_medium(optics_sum, vol_frac_sum, acr, particle_type):
     wave = acr[:, 0]
 
     for i in range(len(optics_sum[0, :])):
@@ -403,12 +402,13 @@ def effective_medium(optics_sum, vol_frac_sum, acr):
             asy = 0
         else:
             asy = asy/qs
-        if vol_frac_sum > 0.08:
-            cor = 1 + 1.5 * vol_frac_sum - 0.75 * (vol_frac_sum ** 2)
-            qs = qs * cor
-            qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa * cor
-        else:
-            qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa
+        if particle_type == 0:
+            if vol_frac_sum > 0.08:
+                cor = 1 + 1.5 * vol_frac_sum - 0.75 * (vol_frac_sum ** 2)
+                qs = qs * cor
+                qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa * cor
+            else:
+                qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa
 
         # checking for bugs
         if qa < (10 ** -8):

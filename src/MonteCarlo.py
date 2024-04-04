@@ -83,7 +83,7 @@ def fresnel_reflectance(n_medium, n_outer, uz):
 def hit_bound(current_layer, layer, uz, z, crit_cos, r, t, active, w):
     if uz < 0:
         # check if within critical cosine
-        if -uz > crit_cos[0, current_layer]:
+        #if -uz > crit_cos[0, current_layer]:
             probability, uz_new = fresnel_reflectance(layer[current_layer+1, 0], layer[current_layer, 0], -uz)
             if random.random_sample() > probability:
                 uz = -uz_new
@@ -94,11 +94,11 @@ def hit_bound(current_layer, layer, uz, z, crit_cos, r, t, active, w):
                     current_layer -= 1
             else:
                 uz = -uz
-        else:
-            uz = -uz
+        #else:
+            #uz = -uz
 
     else:
-        if uz > crit_cos[1, current_layer]:
+        #if uz > crit_cos[1, current_layer]:
             probability, uz_new = fresnel_reflectance(layer[current_layer+1, 0], layer[current_layer+2, 0], uz)
             if random.random_sample() > probability:
                 uz = uz_new
@@ -109,8 +109,8 @@ def hit_bound(current_layer, layer, uz, z, crit_cos, r, t, active, w):
                     current_layer += 1
             else:
                 uz = -uz
-        else:
-            uz = -uz
+        #else:
+            #uz = -uz
 
     return current_layer, uz, r, t, active
 
