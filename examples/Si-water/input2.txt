@@ -1,0 +1,36 @@
+MC
+Output: out2
+Particle 1: si.txt
+Matrix 1: water.txt
+Solar: AM15.txt
+Photons: 100000
+start: 0.25
+end: 2.5
+Interval: 0.001
+
+Sim 1
+Layer 1
+Matrix 1
+T: 500
+Particle 1
+D: 0.5
+VF: 0.1
+Std: 0
+
+Sim 2
+Layer 1
+Matrix 1
+T: 500
+Particle 1
+D: 0.5
+VF: 0.1
+Std: 0.0125
+
+Sim 3
+Layer 1
+Matrix 1
+T: 500
+Particle 1
+D: 0.5
+VF: 0.1
+Std: 0.0625
