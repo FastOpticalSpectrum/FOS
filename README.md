@@ -107,8 +107,6 @@ VF: 60
 Std: 0
 
 Sim 2
-Upper: 1
-Lower: 1
 Layer 1
 Matrix 2
 T: 50
