@@ -1,0 +1,52 @@
+MC
+Output: out1
+Particle 1: fe2o3.txt
+Particle 2: tio2.txt
+Matrix 1: acr.txt
+Solar: AM15.txt
+Photons: 50000
+start: 0.25
+end: 2.5
+Interval: 0.04
+
+Sim 1
+Layer 1
+Matrix 1
+T: 100
+Particle 1
+D: 0.05
+VF: 0.1
+Layer 2
+Medium 1
+T: 300
+Particle 2
+D: 0.4
+VF: 60
+
+Sim 2
+Layer 1
+Matrix 1
+T: 100
+Particle 1
+D: 0.05
+VF: 0.5
+Layer 2
+Matrix 1
+T: 300
+Particle 2
+D: 0.4
+VF: 60
+
+Sim 3
+Layer 1
+Matrix 1
+T: 100
+Particle 1
+D: 0.05
+VF: 1.0
+Layer 2
+Matrix 1
+T: 300
+Particle 2
+D: 0.4
+VF: 60
