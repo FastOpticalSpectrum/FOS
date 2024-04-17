@@ -1,0 +1,18 @@
+MC
+Output: out1
+Particle 1: baso4.txt
+Matrix 1: acr.txt
+Solar: AM15.txt
+Photons: 100000
+start: 0.25
+end: 2.5
+interval: 0.01
+
+Sim 1
+Layer 1
+Matrix 1
+T: 200
+Particle 1
+D: 0.4
+VF: 60
+Std: 0.1
