@@ -19,7 +19,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from numpy import zeros, random, pi, cos, log, vstack
+from numpy import zeros, random, pi, cos, log, vstack, conj, real
 from numba import njit, prange
 
 
@@ -56,26 +56,48 @@ def check_bounds(layer_depths, z, uz, step, current_layer, ua, us):
 
 
 @njit()
-def fresnel_reflectance(n_medium, n_outer, uz):
-    if n_medium == n_outer:
-        return 0, uz
-    elif uz > (1.0 - 1.0e-6):
-        probability = ((n_outer-n_medium)/(n_outer+n_medium))**2
-        return probability, uz
-    elif uz < (1.0e-6):
-        return 1, 0
-    else:
-        temp_1 = (1.0 - uz * uz) ** 0.5
-        temp_2 = n_medium * temp_1 / n_outer
-        if temp_2 >= 1:
+def fresnel_reflectance(n_medium, n_outer, k_outer, uz, outer_layer, num_layers):
+    # if in contact with a boundary, use complex Fresnel eqs.
+    if outer_layer == 0 or outer_layer == num_layers - 1:
+        if n_medium == n_outer and k_outer == 0:
+            return 0, uz
+        elif uz > (1.0 - 1.0e-6):
+            probability = ((n_outer-n_medium)**2 + k_outer**2)/((n_outer+n_medium)**2 + k_outer**2)
+            return probability, uz
+        elif uz < (1.0e-6):
             return 1, 0
-        temp_3 = (1-temp_2*temp_2)**0.5
-        temp_4 = uz*temp_3 - temp_1*temp_2
-        temp_5 = uz*temp_3 + temp_1*temp_2
-        temp_6 = temp_1*temp_3 + uz*temp_2
-        temp_7 = temp_1*temp_3 - uz*temp_2
-        probability = 0.5*temp_7*temp_7*(temp_4*temp_4 + temp_5*temp_5) / (temp_6*temp_6*temp_5*temp_5)
-        return probability, temp_3
+        else:
+            temp_1 = (1.0 - uz * uz) ** 0.5
+            temp_2 = n_medium * temp_1 / (n_outer-1j*k_outer)
+            temp_3 = (1-temp_2*temp_2)**0.5
+            E_par = (uz/temp_3-temp_2)/(uz/temp_3+temp_2)
+            R_par = E_par*conj(E_par)
+            E_per = -(temp_3 / uz - temp_2) / (temp_3 / uz + temp_2)
+            R_per = E_per * conj(E_per)
+            probability = real(R_par + R_per)*0.5
+
+            return probability, 1
+    else:
+        if n_medium == n_outer:
+            return 0, uz
+        elif uz > (1.0 - 1.0e-6):
+            probability = ((n_outer-n_medium)/(n_outer+n_medium))**2
+            return probability, uz
+        elif uz < (1.0e-6):
+            return 1, 0
+        else:
+            temp_1 = (1.0 - uz * uz) ** 0.5
+            temp_2 = n_medium * temp_1 / n_outer
+            if temp_2 >= 1:
+                return 1, 0
+            temp_3 = (1-temp_2*temp_2)**0.5
+            temp_4 = uz*temp_3 - temp_1*temp_2
+            temp_5 = uz*temp_3 + temp_1*temp_2
+            temp_6 = temp_1*temp_3 + uz*temp_2
+            temp_7 = temp_1*temp_3 - uz*temp_2
+            probability = 0.5*temp_7*temp_7*(temp_4*temp_4 + temp_5*temp_5) / (temp_6*temp_6*temp_5*temp_5)
+
+            return probability, temp_3
 
 
 # checks if photon passes through boundary
@@ -83,8 +105,8 @@ def fresnel_reflectance(n_medium, n_outer, uz):
 def hit_bound(current_layer, layer, uz, z, crit_cos, r, t, active, w):
     if uz < 0:
         # check if within critical cosine
-        #if -uz > crit_cos[0, current_layer]:
-            probability, uz_new = fresnel_reflectance(layer[current_layer+1, 0], layer[current_layer, 0], -uz)
+        if -uz > crit_cos[0, current_layer]:
+            probability, uz_new = fresnel_reflectance(layer[current_layer+1, 0], layer[current_layer, 0], layer[current_layer, 1], -uz, current_layer, len(layer[:, 0]))
             if random.random_sample() > probability:
                 uz = -uz_new
                 if current_layer == 0:
@@ -94,12 +116,12 @@ def hit_bound(current_layer, layer, uz, z, crit_cos, r, t, active, w):
                     current_layer -= 1
             else:
                 uz = -uz
-        #else:
-            #uz = -uz
+        else:
+            uz = -uz
 
     else:
-        #if uz > crit_cos[1, current_layer]:
-            probability, uz_new = fresnel_reflectance(layer[current_layer+1, 0], layer[current_layer+2, 0], uz)
+        if uz > crit_cos[1, current_layer]:
+            probability, uz_new = fresnel_reflectance(layer[current_layer+1, 0], layer[current_layer+2, 0], layer[current_layer+2, 1], uz, current_layer+2, len(layer[:, 0]))
             if random.random_sample() > probability:
                 uz = uz_new
                 if current_layer == (len(layer[:, 0])-3):
@@ -109,8 +131,8 @@ def hit_bound(current_layer, layer, uz, z, crit_cos, r, t, active, w):
                     current_layer += 1
             else:
                 uz = -uz
-        #else:
-            #uz = -uz
+        else:
+            uz = -uz
 
     return current_layer, uz, r, t, active
 

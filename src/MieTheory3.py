@@ -33,18 +33,24 @@ def distribution(r, fv, dist):
     half = (num_part - 1) / 2
     for i in range(len(r)):
         mean = r[i] * 2
-        std = dist
+        std = dist[i]
         for j in range(num_part):
-            var = abs(2 - 2 * (j / half))
+            var = abs(3 - 3 * (j / half))
             temp[j] = (1 / std) * exp(-0.5 * (var ** 2))
         temp_sum = sum(temp)
-
-        for j in range(num_part):
-            var = (-2 + 2 * (j / half))
-            r1[i * num_part + j] = (mean - var * std) / 2
-
         for j in range(num_part):
             fv1[i * num_part + j] = (fv[i] * temp[j] / temp_sum)
+
+        for j in range(num_part):
+            var = (-3 + 3 * (j / half))
+            r1[i * num_part + j] = (mean - var * std) / 2
+            if r1[i * num_part + j] < 0.0001:
+                r1[i * num_part + j] = 1
+                fv1[i * num_part + j] = 0
+
+        # renormalize VF
+        vf_sum = sum(fv1)
+        fv1[:] *= fv[i]/vf_sum
     return r1, fv1
 
 
@@ -194,8 +200,9 @@ def mie_theory(r1, fv1, paint, acr, thickness, dist, particle_type):
         prop = move_prop_over(paint, acr, thickness)
         return prop
 
-    if dist != 0:
+    if all(dist) != 0:
         r1, fv1 = distribution(r1, fv1, dist)
+
     wave = paint[:, 0]
     prop = zeros((5, int(len(wave))))
     particles = int(len(r1))
@@ -402,6 +409,8 @@ def effective_medium(optics_sum, vol_frac_sum, acr, particle_type):
             asy = 0
         else:
             asy = asy/qs
+
+        # dependent scattering correction
         if particle_type == 0:
             if vol_frac_sum > 0.08:
                 cor = 1 + 1.5 * vol_frac_sum - 0.75 * (vol_frac_sum ** 2)

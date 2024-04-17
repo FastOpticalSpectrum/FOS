@@ -115,8 +115,8 @@ def import_header(infile, check):
     solar = ""
     # output file name
     output_name = ""
-    # mesh percentage, 1 keeps data as is. Above 1 increases the number of mesh points, below 1 decreases
-    mesh_percentage = 1
+    # mesh percentage, interval spacing between wavelengths.
+    mesh_percentage = 0
 
     #initialize for later
     start = end = 0
@@ -137,8 +137,8 @@ def import_header(infile, check):
             output_name = infile[i][7:]
         if infile[i][0:5] == "solar":
             solar = infile[i][6:]
-        if infile[i][0:4] == "mesh":
-            mesh_percentage = float(infile[i][5:])
+        if infile[i][0:8] == "interval":
+            mesh_percentage = float(infile[i][9:])
         if infile[i][0:7] == "photons":
             photons = int(infile[i][8:])
         if infile[i][0:5] == "start":
@@ -224,20 +224,25 @@ def import_header(infile, check):
 
 
 # checks to make sure the number of diameters matches the number of volume fraction inputs
-def check_diameters(current_sim, fv, sizes, check, ptype_in):
+def check_diameters(current_sim, fv, sizes, check, ptype_in, dist):
     # check to make sure same number of diameters and volume fraction
     if ptype_in == 0:
         if len(fv) != len(sizes):
             print('Number of diameters does not match number of volume fractions provided in sim:', current_sim)
             print("Please re-enter input file once corrected.")
             check = True
+        if dist[0] != 0 or len(dist) > 1:
+            if len(fv) != len(dist):
+                print('Number of diameters does not match number of standard deviations provided in sim:', current_sim)
+                print("Please re-enter input file once corrected.")
+                check = True
     return check
 
 
 # checks to make sure dist = 0 for core shell
 def check_dist(current_sim, dist, check):
     # check to make sure same number of diameters and volume fraction
-    if dist != 0:
+    if all(dist) != 0:
         print('Std must be 0 for core shell sim', current_sim)
         print("Please re-enter input file once corrected.")
         check = True
@@ -259,6 +264,39 @@ def get_index(number, type, p_num, m_num):
     return index
 
 
+def create_prop_array(prop, particle, upper, lower, upper_type, lower_type, layers, optical_per_layer, medium):
+
+    if upper == -1 and lower == -1:
+        for j in range(len(particle[0, :, 0])):
+            prop = vstack((prop, [1, 0, 0, 0, 0]))
+            for k in range(layers):
+                prop = vstack((prop, optical_per_layer[:, j, k]))
+            prop = vstack((prop, [1, 0, 0, 0, 0]))
+            prop = vstack((prop, [0, 0, 0, 0, 0]))
+    elif upper != -1 and lower == -1:
+        for j in range(len(particle[0, :, 0])):
+            prop = vstack((prop, [medium[int(upper_type), j, 1], medium[int(upper_type), j, 2], 0, 0, 0]))
+            for k in range(layers):
+                prop = vstack((prop, optical_per_layer[:, j, k]))
+            prop = vstack((prop, [1, 0, 0, 0, 0]))
+            prop = vstack((prop, [0, 0, 0, 0, 0]))
+    elif upper == -1 and lower != -1:
+        for j in range(len(particle[0, :, 0])):
+            prop = vstack((prop, [1, 0, 0, 0, 0]))
+            for k in range(layers):
+                prop = vstack((prop, optical_per_layer[:, j, k]))
+            prop = vstack((prop, [medium[int(lower_type), j, 1], medium[int(lower_type), j, 2], 0, 0, 0]))
+            prop = vstack((prop, [0, 0, 0, 0, 0]))
+    elif upper != -1 and lower != -1:
+        for j in range(len(particle[0, :, 0])):
+            prop = vstack((prop, [medium[int(upper_type), j, 1], medium[int(upper_type), j, 2], 0, 0, 0]))
+            for k in range(layers):
+                prop = vstack((prop, optical_per_layer[:, j, k]))
+            prop = vstack((prop, [medium[int(lower_type), j, 1], medium[int(lower_type), j, 2], 0, 0, 0]))
+            prop = vstack((prop, [0, 0, 0, 0, 0]))
+    return prop
+
+
 # finds info from input and sends to Mie Theory to calculate optical properties
 def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
     print("Running Mie theory")
@@ -272,9 +310,14 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
     sizes = 0
     fv = 0
     # dist defaults to 0
-    dist = 0
+    dist = zeros(1)
     # if coreshell is true then use that version of Mie theory, else use standard Mie theory
     coreshell = False
+    # upper and lower default to negative number
+    upper = -1
+    lower = -1
+    upper_type = 0
+    lower_type = 0
     # if wait is true, the shell particle must be read in as well
     wait = False
 
@@ -282,6 +325,9 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
     for i in range(line+1, len(infile)):
         if infile[i][0:8] == "particle":
             if count > 0:
+                if coreshell is False:
+                    ptype_in = get_index(ptype, 'p', p_num, m_num)
+                    check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in], dist)
                 if coreshell is True:
                     if wait is False:
                         check = check_dist(current_sim, dist, check)
@@ -297,15 +343,19 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
                     mtype_in = get_index(mtype, 'm', p_num, m_num)
                     optics = mie_theory(sizes, fv, particle[int(ptype_in), :, :], medium[int(mtype_in), :, :], thickness, dist, particle_type[int(ptype_in)])
                     optics_sum += optics
+                # dist defaults to 0
+                dist = zeros(1)
             count += 1
             # holds previous ptype for core shell
             if count > 1:
                 ptypeCore = ptype
             ptype = int(infile[i][8:])
         if infile[i][0:5] == "upper":
-            upper = float(infile[i][6:])
+            upper = int(infile[i][12:])
+            upper_type = get_index(upper, 'm', p_num, m_num)
         elif infile[i][0:5] == "lower":
-            lower = float(infile[i][6:])
+            lower = int(infile[i][12:])
+            lower_type = get_index(lower, 'm', p_num, m_num)
         elif infile[i][0:6] == "matrix":
             mtype = int(infile[i][6:])
         elif infile[i][0:2] == "t:":
@@ -321,9 +371,9 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
             fv = asarray(fv, dtype=float)
             fv = fv/100
             vol_frac_sum += sum(fv)
-        elif infile[i][0:5] == "std:":
-            dist = float(infile[i][5:])
-            dist = dist
+        elif infile[i][0:4] == "std:":
+            dist = (infile[i][4:]).split(",")
+            dist = asarray(dist, dtype=float)
         elif infile[i][0:2] == "c:":
             core = (infile[i][2:]).split(",")
             core = asarray(core, dtype=float)
@@ -338,7 +388,7 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
             # check to make sure same number of diameters as volume fractions
             if coreshell is False:
                 ptype_in = get_index(ptype, 'p', p_num, m_num)
-                check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in])
+                check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in], dist)
             layers += 1
             if coreshell is True:
                 check = check_dist(current_sim, dist, check)
@@ -361,12 +411,14 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
             vol_frac_sum = 0
             optics_sum = zeros((5, len(particle[0, :, 0])))
             count = 0
+            # reset default dist to 0
+            dist = zeros(1)
         elif infile[i][0:3] == "sim" and infile[i][3:] != "1":
             current_sim = int(infile[i][3:])
             # check to make sure same number of diameters as volume fractions
             if coreshell is False:
                 ptype_in = get_index(ptype, 'p', p_num, m_num)
-                check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in])
+                check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in], dist)
             if coreshell is True:
                 check = check_dist(current_sim, dist, check)
                 # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
@@ -384,23 +436,21 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
             optics_sum[4, :] = optics[4, :]
             optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype_in), :, :], particle_type[int(ptype_in)])
             optical_per_layer = dstack((optical_per_layer, optics_sum))
-            for j in range(len(particle[0, :, 0])):
-                prop = vstack((prop, [upper, 0, 0, 0, 0]))
-                for k in range(layers):
-                    prop = vstack((prop, optical_per_layer[:, j, k]))
-                prop = vstack((prop, [lower, 0, 0, 0, 0]))
-                prop = vstack((prop, [0, 0, 0, 0, 0]))
+            prop = create_prop_array(prop, particle, upper, lower, upper_type, lower_type, layers, optical_per_layer, medium)
             vol_frac_sum = 0
             optics_sum = zeros((5, len(particle[0, :, 0])))
             optical_per_layer = zeros((5, len(particle[0, :, 0]), 0))
             layers = 1
             count = 0
             # reset default dist to 0
-            dist = 0
+            dist = zeros(1)
+            # reset upper and lower default to negative number
+            upper = -1
+            lower = -1
     # check to make sure same number of diameters as volume fractions
     if coreshell is False:
         ptype_in = get_index(ptype, 'p', p_num, m_num)
-        check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in])
+        check = check_diameters(current_sim, fv, sizes, check, particle_type[ptype_in], dist)
     if coreshell is True:
         check = check_dist(current_sim, dist, check)
         # get the index for each material number (index 1 may refer to particle 2 if they are not sequentially numbered)
@@ -418,12 +468,7 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
     optics_sum[4, :] = optics[4, :]
     optics_sum = effective_medium(optics_sum, vol_frac_sum, medium[int(mtype_in), :, :], particle_type[int(ptype_in)])
     optical_per_layer = dstack((optical_per_layer, optics_sum))
-    for j in range(len(particle[0, :, 0])):
-        prop = vstack((prop, [upper, 0, 0, 0, 0]))
-        for k in range(layers):
-            prop = vstack((prop, optical_per_layer[:, j, k]))
-        prop = vstack((prop, [lower, 0, 0, 0, 0]))
-        prop = vstack((prop, [0, 0, 0, 0, 0]))
+    prop = create_prop_array(prop, particle, upper, lower, upper_type, lower_type, layers, optical_per_layer, medium)
     return prop, check
 
 
@@ -526,7 +571,7 @@ def check_input_for_errors(infile):
 
     ### check for each item in header
     # initially these variables are set to 0, if they are changed to 1 then it is good. If it remains 0 then there is an error
-    output = particle = medium = photon = 0
+    output = particle = medium = photon = interval = 0
     if infile[0] == "nn":
         photon = 1
 
@@ -545,10 +590,8 @@ def check_input_for_errors(infile):
         if infile[0] == "mc":
             if infile[i][:7] == "photons" and infile[i][9:] != '':
                 photon = 1
-        if infile[i][:4] == "mesh":
-            if float(infile[i][5:]) <= 0:
-                check = True
-                print('Mesh value must be > 0')
+        if infile[i][:8] == "interval":
+            interval = 1
         # break loop once the first sim starts, this only checks the header
         if infile[i][:3] == "sim":
             break
@@ -566,6 +609,9 @@ def check_input_for_errors(infile):
     if photon == 0:
         check = True
         print("Number of photons must be specified")
+    if interval == 0:
+        check = True
+        print("No interval specified")
 
 
     ### check for errors in the body of the file
@@ -583,10 +629,6 @@ def check_input_for_errors(infile):
         check = True
         print("Error in simulation numbers. Make sure they are labeled Sim 1, Sim 2, etc.")
 
-    # check for upper boundary condition
-    check = check_for_word_in_sim(infile, 'upper', 'defined upper boundary condition', check)
-    # check for lower boundary condition
-    check = check_for_word_in_sim(infile, 'lower', 'defined lower boundary condition', check)
     # check for at least one layer
     check = check_for_word_in_sim(infile, 'layer', 'at least one defined layer', check)
     # check for at least one medium
@@ -779,7 +821,7 @@ def main_func():
 if __name__ == "__main__":
     print('\033[1m{: ^75s}\033[0m'.format("FOS"))
     print('{: ^75s}'.format("Fast Optical Spectrum calculations for nanoparticle media"))
-    print('{: ^75s}'.format("Version: 0.5.2\n"))
+    print('{: ^75s}'.format("Version: 0.6.0\n"))
     print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiulin Ruan"))
     print('{: ^75s}'.format("School of Mechanical Engineering, Purdue University"))
     print('{: ^75s}'.format("West Lafayette, IN 47907, USA\n"))
