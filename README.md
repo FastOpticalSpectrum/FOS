@@ -48,7 +48,7 @@ Each input file contains a header and a body. The header consists of information
 + The mesh setting (defaults to 1 if not included).
 + The solar spectrum to integrate with the reflectance (not required).
 + The number of photons if running a Monte Carlo simulation.
-+ The start and end wavelength to simulate.
++ The start and end wavelength to simulate, as well as the wavelength interval.
 + Custom optical properties can be used (look at the example in main_example)
 
 Example header:
@@ -68,44 +68,43 @@ Particle 2: BaSO4.txt
 Matrix 1: acr.txt
 Matrix 2: air.txt
 
-# mesh allows you to control the density of wavelengths simulated
-# if mesh is not included, it will default to 1
-Mesh: 0.5
-
 # if solar is included, the output file will include the integrated solar response
 Solar: am15.txt
 
 # number of photons per wavelength for Monte Carlo simulations
 Photons: 30000
 
-# wavelength range tested in microns
+# wavelength range and interval in microns
 # if this is left out, it will default to the broadest range all materials provide
 Start: 0.25
 End: 2.5
+# must specify a wavelength interval
+Interval: 0.005
 ```
 
 The body of the input file consists of information for each simulation. An example body is shown below with one simple simulation, and one with more complex features. In each simulation, the following is required:
 + Sequentially ordered simulation number (1, 2, 3, ..., n).
-+ Upper and lower boundary condition refractive index, this number is applied to all wavelengths simulated.
++ Upper and lower refractive index boundaries. If not included, it will default to air (n=1)
 + Within each simulation each layer must be labelled. Sim 1 below only has one layer, Sim 2 has 2 layers.
 + Each layer must include at least one matrix and one particle.
 + The number next to medium or particle refer to the file imported from the header. For example, in Sim 1 when it refers to Particle 2, that uses the TiO2.txt file which was imported in the header as Particle 2.
 + Under matrix, the layer thickness must be specified. All units in the input file are in microns.
-+ Under each particle, the diamater, volume fraction, and distribution must be specified. Multiple diameters can be provided under one particle such as in Sim 2 layer 1
++ Under each particle, the diamater and volume fraction must be specified. Multiple diameters can be provided under one particle such as in Sim 2 layer 1
++ Additionally, below each particle the diameter standard deviation can be specified for one or multiple particles. Defaults to 0 if not included.
 + Multiple particle types can be used within a layer such as in Sim 2 Layer 1 by specifying the particles sequentially before beginning layer 2
 
 Example body:
 ```
 Sim 1
-Upper: 1
-Lower: 1
+Upper: Matrix 2
+Lower: Matrix 2
 Layer 1
 Matrix 1
 T: 100
 Particle 2
 D: 0.4
 VF: 60
-Dist: 0
+Std: 0
 
 Sim 2
 Upper: 1
@@ -116,18 +115,17 @@ T: 50
 Particle 1
 D: 0.4, 0.8
 VF: 10, 20
-Dist: 10
+Std: 0.05, 0.1
 Particle 2
 D: 0.5, 0.2
 VF: 20, 10
-Dist: 20
 Layer 2
 Matrix 1
 T: 50
 Particle 1
 D: 0.5
 VF: 60
-Dist: 45
+Std: 0.2
 ```
 An example input file is provided (main_example/input.txt) in the examples folder which shows examples of different simulation features.
 
