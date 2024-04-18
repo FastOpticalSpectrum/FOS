@@ -130,7 +130,7 @@ An example input file is provided (main_example/input.txt) in the examples folde
 ## Output files
 Two output files will be generated per simulation, one with data about the simulation and one with the plotted spectral response. In the file with data, it will include the solar reflectance, absorptance, and transmittance if the solar file is provided in the input, the spectral response and scattering properties (of each layer) at each wavelength simulated, and a copy of the input file information for that simulation at the end for reference. All units in the input and output files are in microns.
 
-## Video tutorial
+## Video tutorial (Version 0.5.x)
 [![FOS video tutorial](https://i.imgur.com/FgmoT5N.png)](https://www.youtube.com/watch?v=fCwUsdP4lq8 "FOS tutorial")
 
 ## Dictionary
@@ -141,14 +141,14 @@ Two output files will be generated per simulation, one with data about the simul
 | Output: | Header   | -   | Output file prefix.   |
 | Particle 3: | Header   | μm   | .txt materials file for a particulate material with n and k, each particle can be specified by any integer (3 in this case). The wavelength units in the material file must be in microns.   |
 | Matrix 5: | Header   | μm   | .txt materials file for a matrix material with n and k, each matrix can be specified by any integer (5 in this case). The wavelength units in the material file must be in microns.   |
-| Mesh: | Header   | -    |  Controls multiplier of wavelength interbval (0.5 means half the wavelengths simulated, 2 means double the wavelengths simulated). Not requires, defaults to 1.  |
 | Solar: | Header   | μm    | .txt file with solar power at each wavelength (or anything you want to integrate, does not need to just be solar). The wavelength units in the material file must be in microns.   |
 | Photons | Header   | -    | Number of photons (energy bundles) to use per wavelength for Monte Carlo simulations, not required for NN.   |
 | Start: | Header   | μm    | Shortest wavelength of wavelength range to simulate.   |
 | End: | Header   | μm    | Longest wavelength of wavelength range to simulate.   |
+| Interval: | Header   | μm    | Interval between wavelengths to simulate.   |
 | Sim 7 | Body   | -    | Simulation number (7 in this case), must be sqeuentially numbered starting with 1. |
-| Upper: | Body   | -    | Upper (top surface) refractive index value. 1 is generally used for air/vacuum. One must be specified for each simulation. |
-| Lower: | Body   | -    | Lower (bottom surface) refractive index value. 1 is generally used for air/vacuum. One must be specified for each simulation. |
+| Upper: | Body   | -    | Upper (top surface) refractive index. Defaults to air if left out, a matrix material is specified here otherwise. |
+| Lower: | Body   | -    | Lower (bottom surface) refractive index value. Defaults to air if left out, a matrix material is specified here otherwise. |
 | Layer 1 | Body   | -    | Layer number. If single layer simulation, the first layer must still be labelled 'Layer 1'. Layer numbers must be sequentially numbered starting with 1 where the first layer is the upper surface.  |
 | Matrix 5 | Body   | -    | For each layer, one matrix must be chosen. Here, 'Matrix 5' would refer to the material file imported in the header.  |
 | T: | Body   | μm    | Thickness of layer must be specified after the Matrix is set.  |
@@ -157,5 +157,5 @@ Two output files will be generated per simulation, one with data about the simul
 | C: | Body   | μm    | Particle core diameter, must have core diameter set for each core-shell particle (not solid).    |
 | S: | Body   | μm    | Particle shell wall thickness, must have shell wall thickness set for each core-shell particle (not solid).    |
 | VF: | Body   | -    | Particle volume fraction, must set for each particle.   |
-| Dist: | Body   | -    | Particle size distribution, defaults to 0 if not included. Only applicable for solid particles, does not work for core-shell particles. Dist: 45 would refer to a +/- 45% particle size distribution, where 45% is two times the standard deviation.   |
+| Std: | Body   | -    | Particle size standard deviation, defaults to 0 if not included. Only applicable for solid particles, does not work for core-shell particles. Particle sizes up to 3 times the standard deviation are modelled. |
 
