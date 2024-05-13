@@ -24,7 +24,6 @@ Solar: am15.txt
 Photons: 30000
 
 # wavelength range tested in microns
-# if this is left out, it will default to the broadest range all materials provide
 Start: 0.25
 End: 2.5
 Interval: 0.02
