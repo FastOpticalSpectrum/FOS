@@ -11,9 +11,9 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 Cite: 
 
 ## How to download and use __`FOS`__
-There are two ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python on your computer. This file can be downloaded through the latest release and may take a few seconds to load after opening.
+There are two ways to use this program. On a Windows operating system one can use the FOS.exe file. This .exe file does not have any dependencies so you do not need to have Python or install any libraries. This file can be downloaded through the latest release and may take a few seconds to load after opening.
 
-Alternatively, for other operating systems or for security reasons, one can use the Python source code in the src folder by simply running Main3.py. This was built in Python 3.10 and may or may not work in other versions. 
+Alternatively, for other operating systems or for security reasons, one can use the Python source code in the src folder by simply running Main3.py. This was built in Python 3.10 and may or may not work in other versions. Once all dependencies are installed, FOS can be run in the terminal with "python Main3.py". All python files, input files, material files, and the folder titled "Model" must be located in the same directory.
 
 If you have any questions, issues, or requests, please put them in the Discussions tab!
 
