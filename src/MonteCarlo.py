@@ -68,13 +68,14 @@ def fresnel_reflectance(n_medium, n_outer, k_outer, uz, outer_layer, num_layers)
             return 1, 0
         else:
             temp_1 = (1.0 - uz * uz) ** 0.5
-            temp_2 = n_medium * temp_1 / (n_outer-1j*k_outer)
-            temp_3 = (1-temp_2*temp_2)**0.5
-            E_par = (uz/temp_3-temp_2)/(uz/temp_3+temp_2)
-            R_par = E_par*conj(E_par)
-            E_per = -(temp_3 / uz - temp_2) / (temp_3 / uz + temp_2)
+            temp_1_5 = n_medium / (n_outer - 1j * k_outer)
+            temp_2 = n_medium * temp_1 / (n_outer - 1j * k_outer)
+            temp_3 = (1 - temp_2 * temp_2) ** 0.5
+            E_par = (uz / temp_3 - temp_1_5) / (uz / temp_3 + temp_1_5)
+            R_par = E_par * conj(E_par)
+            E_per = -(temp_3 / uz - temp_1_5) / (temp_3 / uz + temp_1_5)
             R_per = E_per * conj(E_per)
-            probability = real(R_par + R_per)*0.5
+            probability = real(R_par + R_per) * 0.5
 
             return probability, 1
     else:
