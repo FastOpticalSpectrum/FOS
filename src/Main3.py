@@ -24,7 +24,7 @@ from MieTheory3 import mie_theory, effective_medium, mie_theory_coreshell
 from MonteCarlo import main_mc
 from SolarIntegration import solar_spectrum
 import os.path
-from NN_feedforward import forward
+from RNN_feedforward import forward
 from interpolate import interpolate
 import matplotlib.pyplot as plt
 
@@ -491,31 +491,22 @@ def check_NN_range(prop, check):
             if prop[i, 4] == 0 and prop[i, 0] != 1:
                 print("Neural network is only trained on boundary indices of 1")
                 check = True
-            if prop[i, 0] < 1 or prop[i, 0] > 7:
-                print("A refractive index of" + str(prop[i, 0]) + "is out of bounds [1, 7]")
+            if prop[i, 0] < 1 or prop[i, 0] > 2.5:
+                print("A refractive index of " + str(prop[i, 0]) + " is out of bounds [1, 2.5]")
                 check = True
-        # Checks the absorption coefficient, scattering coefficient, asymmetry parameter
+        # Checks the non-dimensional absorption coefficient, non-dimensional scattering coefficient, asymmetry parameter
         if prop[i, 4] != 0:
             # absorption coefficient
-            if prop[i, 1] < 0 or prop[i, 1] > 1000000:
-                print("An absorption coefficient of" + str(prop[i, 1]) + "is out of bounds [0, 1,000,000] (1/cm)")
+            if (prop[i, 1]*prop[i,4]) < 0 or (prop[i, 1]*prop[i,4]) > 50000:
+                print("An absorption coefficient * thickness of " + str((prop[i, 1]*prop[i,4])) + " is out of bounds [0, 50,000]")
                 check = True
             # scattering coefficient
-            if prop[i, 2] < 0 or prop[i, 2] > 200000:
-                print("A scattering coefficient of" + str(prop[i, 2]) + "is out of bounds [0, 200,000] (1/cm)")
+            if (prop[i, 2]*prop[i,4]) < 0 or (prop[i, 2]*prop[i,4]) > 50000:
+                print("A scattering coefficient * thickness of " + str((prop[i, 2]*prop[i,4])) + " is out of bounds [0, 50000]")
                 check = True
             # asymmetry parameter
             if prop[i, 3] < 0 or prop[i, 3] > 1:
-                print("An asymmetry parameter of" + str(prop[i, 3]) + "is out of bounds [0, 1]")
-                check = True
-        # check for multi layered sims
-        if prop[i, 4] != 0 and prop[i+1, 4] != 0:
-            print("The neural network cannot predict multi-layer media")
-            check = True
-        # check paint thickness
-        if prop[i, 4] != 0:
-            if prop[1, 4] < .0005 or prop[1, 4] > .05:
-                print("A thickness of " + str(prop[1, 4]*10000) + " is out of bounds [5, 500] \u03BCm")
+                print("An asymmetry parameter of " + str(prop[i, 3]) + " is out of bounds [0, 1]")
                 check = True
 
         if check is True:
@@ -682,7 +673,7 @@ def main_func():
 
         # Run NN prediction if properties are within NN range
         if check is False:
-            results = forward(prop)
+            results = forward(prop, sims*sims_per_medium)
     else:
         print("Please specify either MC or NN in the first line of the input file")
         print("Please re-enter input file once corrected")
@@ -821,7 +812,7 @@ def main_func():
 if __name__ == "__main__":
     print('\033[1m{: ^75s}\033[0m'.format("FOS"))
     print('{: ^75s}'.format("Fast Optical Spectrum calculations for nanoparticle media"))
-    print('{: ^75s}'.format("Version: 0.6.1\n"))
+    print('{: ^75s}'.format("Version: 0.6.2\n"))
     print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiulin Ruan"))
     print('{: ^75s}'.format("School of Mechanical Engineering, Purdue University"))
     print('{: ^75s}'.format("West Lafayette, IN 47907, USA\n"))
