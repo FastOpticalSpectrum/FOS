@@ -484,6 +484,11 @@ def nanoparticle(infile, check, line, particle, medium, p_num, m_num, particle_t
 
 # Makes sure the input data is within the range the NN is trained on
 def check_NN_range(prop, check):
+    # check for model folder
+    model_folder_exists = os.path.exists('model/bh_rnn1.7.txt')
+    if model_folder_exists == False:
+        print("Cannot fine 'model' folder for neural network weights, make sure model folder is in the same directory as FOS.")
+        check = True
     # If check is True, NN does not run and the user must change the input file
     for i in range(len(prop[:, 0])):
         # checks refractive indices
@@ -596,7 +601,7 @@ def check_input_for_errors(infile):
         print("No particle input specified")
     if medium == 0:
         check = True
-        print("No medium input specified")
+        print("No matrix input specified")
     if photon == 0:
         check = True
         print("Number of photons must be specified")
@@ -812,7 +817,7 @@ def main_func():
 if __name__ == "__main__":
     print('\033[1m{: ^75s}\033[0m'.format("FOS"))
     print('{: ^75s}'.format("Fast Optical Spectrum calculations for nanoparticle media"))
-    print('{: ^75s}'.format("Version: 0.6.3\n"))
+    print('{: ^75s}'.format("Version: 0.6.4\n"))
     print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiulin Ruan"))
     print('{: ^75s}'.format("School of Mechanical Engineering, Purdue University"))
     print('{: ^75s}'.format("West Lafayette, IN 47907, USA\n"))
