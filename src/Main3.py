@@ -812,7 +812,7 @@ def main_func():
 if __name__ == "__main__":
     print('\033[1m{: ^75s}\033[0m'.format("FOS"))
     print('{: ^75s}'.format("Fast Optical Spectrum calculations for nanoparticle media"))
-    print('{: ^75s}'.format("Version: 0.6.2\n"))
+    print('{: ^75s}'.format("Version: 0.6.3\n"))
     print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiulin Ruan"))
     print('{: ^75s}'.format("School of Mechanical Engineering, Purdue University"))
     print('{: ^75s}'.format("West Lafayette, IN 47907, USA\n"))
