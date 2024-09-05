@@ -6,7 +6,7 @@ __`FOS`__, which means "light" in Greek, is used for Fast Optical Spectrum (`FOS
 + Ziqi Guo: gziqi@purdue.edu
 + Dudong Feng: feng376@purdue.edu
 + Zherui Han: zrhan@purdue.edu
-+ Xiulin Ruan:ruan@purdue.edu
++ Xiulin Ruan: ruan@purdue.edu
 
 Cite: 
 
