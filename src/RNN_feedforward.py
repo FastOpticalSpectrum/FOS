@@ -18,7 +18,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+import numpy as np
 from numpy import zeros, loadtxt, vstack, log10, concatenate, max, float32
 from numba import njit, prange
 
@@ -118,8 +118,10 @@ def stack_features(prop, sims):
 def forward(prop, sims):
     # import weights and biases
     w1 = loadtxt('model/w1_rnn1.7.txt', dtype=float32)
-    w2 = loadtxt('model/w2_rnn1.7.txt', dtype=float32)
-    w3 = loadtxt('model/w3_rnn1.7.txt', dtype=float32)
+    w2a = loadtxt('model/w2a_rnn1.7.txt', dtype=float32)
+    w2b = loadtxt('model/w2b_rnn1.7.txt', dtype=float32)
+    w3a = loadtxt('model/w3a_rnn1.7.txt', dtype=float32)
+    w3b = loadtxt('model/w3b_rnn1.7.txt', dtype=float32)
     wo = loadtxt('model/wo_rnn1.7.txt', dtype=float32)
     wh = loadtxt('model/wh_rnn1.7.txt', dtype=float32)
 
@@ -128,7 +130,13 @@ def forward(prop, sims):
     b3 = loadtxt('model/b3_rnn1.7.txt', dtype=float32)
     bo = loadtxt('model/bo_rnn1.7.txt', dtype=float32)
     bh = loadtxt('model/bh_rnn1.7.txt', dtype=float32)
+    w2 = np.zeros((1024, 1024))
+    w2[:512, :] = w2a[:, :]
+    w2[512:, :] = w2b[:, :]
 
+    w3 = np.zeros((1024, 1024))
+    w3[:512, :] = w3a[:, :]
+    w3[512:, :] = w3b[:, :]
     # non-dimensionalize
     prop2 = prop.copy()
     prop2[:, 1] *= prop[:, 4]
