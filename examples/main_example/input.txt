@@ -123,7 +123,7 @@ D: 0.5
 VF: 30
 
 ## this is an example of using pre-calculated particle properties
-# the diameter or volume fraction is not required here. If a diameter or VF are provided, FOS will ignore it.
+# volume fraction is required for determining binder absorption. It does not alter particle optical properties.
 # the custom properties file includes the wavelength, absorption coefficient, scattering coefficient, and asymmetry parameter, with base units in microns
 
 Sim 6
@@ -133,4 +133,5 @@ Layer 1
 Matrix 1
 T: 100
 Particle 3
+VF: 30
 
