@@ -38,6 +38,19 @@ Install the required packages using conda:
 ```
 conda install --file requirements.txt
 ```
+## Running FOS
+Option 1: Run the file 'Main3.py' within a Python environment.
+Option 2: Run the executable 'FOS.exe'. Does not require a local Python installation.
+Option 3: From a seperate Python file, FOS can be called. First, import the function using:
+```
+from Main3 import main_func
+```
+Then, call the function passing two arguments. First, the name of the input file, and second, a boolean where True returns an array and False does not:
+```
+spectral_response = main_func('input.txt', True)
+or
+main_func('input.txt', False)
+```
 
 ## Input file
 Each input file contains a header and a body. The header consists of information that is not repeated per simulation. Upper / lower case text does not matter, and a # comments out a line for your personal comments. It is highly encouraged to view the example input files. Under the examples folder, the "main_example" input file contains simulations with many different examples including multiple layers, multiple particle types, inputting custom properties, core-shell particles, etc. As shown in the example below, what is needed is:
