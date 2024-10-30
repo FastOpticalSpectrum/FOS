@@ -40,7 +40,9 @@ conda install --file requirements.txt
 ```
 ## Running FOS
 Option 1: Run the file 'Main3.py' within a Python environment.
+
 Option 2: Run the executable 'FOS.exe'. Does not require a local Python installation.
+
 Option 3: From a seperate Python file, FOS can be called. First, import the function using:
 ```
 from Main3 import main_func
