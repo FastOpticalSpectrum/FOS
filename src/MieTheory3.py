@@ -395,7 +395,7 @@ def mie_theory_coreshell(r1, s1, fv1, paint_core, paint_shell, acr, thickness, d
 
 
 
-@njit()
+#@njit()
 def effective_medium(optics_sum, vol_frac_sum, acr, particle_type):
     wave = acr[:, 0]
 
@@ -418,7 +418,8 @@ def effective_medium(optics_sum, vol_frac_sum, acr, particle_type):
                 qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa * cor
             else:
                 qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa
-
+        else:
+            qa = 4 * pi * k_m * (10 ** 4) * (1 - vol_frac_sum) / wave[i] + qa
         # checking for bugs
         if qa < (10 ** -8):
             qa = 0

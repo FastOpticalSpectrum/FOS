@@ -19,7 +19,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from numpy import loadtxt, zeros, append, vstack, asarray, savetxt, dstack, round, max
+from numpy import loadtxt, zeros, append, vstack, asarray, concatenate, dstack, round, max
 from MieTheory3 import mie_theory, effective_medium, mie_theory_coreshell
 from MonteCarlo import main_mc
 from SolarIntegration import solar_spectrum
@@ -41,6 +41,16 @@ def fname():
         else:
             print("File not found. Make sure it is in the same directory as this program.")
     return infile
+
+
+def check_file(file, check):
+    infile = " "
+    if os.path.exists(file):
+        infile = loadtxt(file, comments="#", dtype=str, delimiter="/")
+    else:
+        print("File not found. Make sure it is in the same directory as this program.")
+        check = False
+    return infile, check
 
 
 # makes sure a file exists within the directory
@@ -308,7 +318,7 @@ def optical(line, infile, particle, medium, check, p_num, m_num, particle_type):
     layers = 1
     count = 0
     sizes = 0
-    fv = 0
+    fv = None
     # dist defaults to 0
     dist = zeros(1)
     # if coreshell is true then use that version of Mie theory, else use standard Mie theory
@@ -633,10 +643,8 @@ def check_input_for_errors(infile):
     check = check_for_word_in_sim(infile, 't:', 'a defined thickness', check)
     # check for at least one particle
     check = check_for_word_in_sim(infile, 'particle', 'at least one particle', check)
-    # check for diameter or core shell
-
-    # check for VF
-    check = check_for_word_in_sim(infile, 'vf', 'a defined particle volume fraction', check)
+    # check for at least one volume fraction
+    check = check_for_word_in_sim(infile, 'vf', 'at least volume fraction', check)
 
 
 
@@ -646,14 +654,149 @@ def check_input_for_errors(infile):
     return check, infile
 
 
-def main_func():
+def integrate_solar(solar, sims, wavelengths, start, end, results, sims_per_medium):
+    if solar != "":
+        # solar r, a, and t value for each simulation
+        solar_r = zeros(sims)
+        solar_a = zeros(sims)
+        solar_t = zeros(sims)
+        # reflectance at each wavelength to be integrated with the solar spectrum
+        refl = zeros((len(wavelengths), 2))
+        tra = zeros((len(wavelengths), 2))
+        # move wavelengths over to refl
+        refl[:, 0] = wavelengths
+        tra[:, 0] = wavelengths
+        solar_file = loadtxt(solar)
+        if start > solar_file[0, 0] or end < solar_file[-1, 0]:
+            print("\n")
+            print("WARNING: Wavelength range does not cover the full spectrum for the provided solar file.")
+            print("The integration only covers the wavelength range provided and not the entire solar file range\n")
+        # loop through each simulation to calculate solar reflectance
+        for i in range(sims):
+            # add the specular and diffuse reflectance together for total reflectance
+            refl[:, 1] = (results[i*sims_per_medium:(i+1)*sims_per_medium, 0]+results[i*sims_per_medium:(i+1)*sims_per_medium, 1])
+            tra[:, 1] = (results[i * sims_per_medium:(i + 1) * sims_per_medium, 3])
+            # send to function to integrate
+            solar_r[i], solar_a[i], solar_t[i] = solar_spectrum(solar_file, refl, tra)
+
+    else:
+        solar = ""
+    return solar_r, solar_a, solar_t, solar
+
+
+def write_output_script(results, sims, output_name, solar, solar_r, solar_a, solar_t, wavelengths, prop, infile):
+    # save output scripts
+    length = int(len(results[:, 0]) / sims)
+    prop_line = 0
+    for i in range(sims):
+        output_sim = str(output_name) + str(i + 1) + ".txt"
+        with open(output_sim, 'w') as f:
+            f.write('Sim ' + str(i + 1) + '\n')
+            f.write('\n')
+            if solar != "":
+                f.write('Solar R: ' + str(abs(round(solar_r[i], 4))) + '\n')
+                f.write('Solar A: ' + str(abs(round(solar_a[i], 4))) + '\n')
+                f.write('Solar T: ' + str(abs(round(solar_t[i], 4))) + '\n')
+                f.write('\n')
+            f.write('WL\tR\tA\tT')
+            num_layers = int(results[i * length, 4])
+            for layer in range(num_layers):
+                f.write('\tn(' + str(layer + 1) + ')' + '\tmu_a(' + str(layer + 1) + ')' + '\tmu_s(' + str(
+                    layer + 1) + ')' + '\tg(' + str(layer + 1) + ')' + '\tt(' + str(layer + 1) + ')')
+            f.write('\n')
+            for j in range(length):
+                f.write(str(round(wavelengths[j], 4)) + '\t')
+                f.write(str(round(results[j + length * i, 0] + results[j + length * i, 1], 4)) + '\t')
+                f.write(str(round(results[j + length * i, 2], 4)) + '\t')
+                f.write(str(round(results[j + length * i, 3], 4)) + '\t')
+                # save properties
+                while prop[prop_line, 0] != 0:
+                    prop_line += 1
+                for layer in range(num_layers):
+                    f.write(str(round(prop[prop_line - (1 + num_layers) + layer, 0], 4)) + '\t')
+                    f.write(str(round(prop[prop_line - (1 + num_layers) + layer, 1] / 10000, 4)) + '\t')
+                    f.write(str(round(prop[prop_line - (1 + num_layers) + layer, 2] / 10000, 4)) + '\t')
+                    f.write(str(round(prop[prop_line - (1 + num_layers) + layer, 3], 4)) + '\t')
+                    f.write(str(round(prop[prop_line - (1 + num_layers) + layer, 4] * 10000, 4)) + '\t')
+                prop_line += 1
+                f.write('\n')
+            f.write('\n')
+            f.write('Input file:\n')
+            for j in range(len(infile)):
+                if infile[j][:3] == "sim":
+                    break
+                f.write(infile[j] + '\n')
+            for j in range(len(infile)):
+                if infile[j][:] == "sim" + str(i + 1):
+                    f.write('\n')
+                    f.write("sim" + str(i + 1) + '\n')
+                    for k in range(j + 1, len(infile)):
+                        if infile[k][:3] == "sim":
+                            break
+                        f.write(infile[k] + '\n')
+                    break
+
+        f.close()
+    return length
+
+
+def plot_results(sims, results, length, wavelengths, solar, start, end, output_name):
+    # plot configuration
+    plt.style.use('default')
+    figsize = (10, 8)
+    dpi = 600
+    axis_font_size = 15  # font_size = 6
+    label_font_size = 17  # font_size = 7
+    linewidth = 1.5
+
+    plt.rcParams['xtick.direction'] = 'in'
+    plt.rcParams['ytick.direction'] = 'in'
+    plt.rcParams['font.size'] = axis_font_size
+    plt.rcParams['font.sans-serif'] = ['Arial']
+
+    # plot the spectral response
+    for i in range(sims):
+        # get the result of this run
+        R_results = results[i * length:(i + 1) * length, 0] + results[i * length:(i + 1) * length, 1]
+        A_results = results[i * length:(i + 1) * length, 2]
+        T_results = results[i * length:(i + 1) * length, 3]
+
+        # plot the R, A, T
+        plt.figure(figsize=figsize, dpi=dpi)
+        plt.plot(wavelengths, R_results, label="R", color='black', linewidth=linewidth)
+        plt.plot(wavelengths, A_results, label="A", color='red', linewidth=linewidth)
+        plt.plot(wavelengths, T_results, label="T", color='blue', linewidth=linewidth)
+
+        # plot the solar spectrum
+        if solar != "":
+            solar_arr = loadtxt(solar)
+            plt.fill_between(solar_arr[:, 0],
+                             solar_arr[:, 1] / max(solar_arr[:, 1]),
+                             color='pink',
+                             alpha=0.5)
+
+        # plot configuration
+        plt.xlim(start, end)
+        plt.ylim(0, 1)
+        plt.xlabel('Wavelength (\u03BCm)', fontsize=label_font_size)
+        plt.ylabel('Spectral Responce', fontsize=label_font_size)
+        plt.legend(loc='upper right', frameon=False, fontsize=axis_font_size)
+        plt.savefig(str(output_name) + "_plot{}.png".format(i + 1))
+    print("Results saved!")
+    return
+
+
+def main_func(file_name=None, return_array=False):
 
     # loop until input file has no identifiable errors
     # check is initially True, if the input file has no identifiable errors, check will be false
     check = True
     while check:
-        # imports the provided txt file
-        infile = fname()
+        if file_name:
+            infile, check = check_file(file_name, check)
+        else:
+            # imports the provided txt file
+            infile = fname()
         # check the input file for errors
         check, infile = check_input_for_errors(infile)
 
@@ -687,138 +830,29 @@ def main_func():
 
 
     # if solar spectrum is provided, integrate for solar reflectance
-    if solar != "":
-        # solar r, a, and t value for each simulation
-        solar_r = zeros(sims)
-        solar_a = zeros(sims)
-        solar_t = zeros(sims)
-        # reflectance at each wavelength to be integrated with the solar spectrum
-        refl = zeros((len(wavelengths), 2))
-        tra = zeros((len(wavelengths), 2))
-        # move wavelengths over to refl
-        refl[:, 0] = wavelengths
-        tra[:, 0] = wavelengths
-        solar_file = loadtxt(solar)
-        if start > solar_file[0, 0] or end < solar_file[-1, 0]:
-            print("\n")
-            print("WARNING: Wavelength range does not cover the full spectrum for the provided solar file.")
-            print("The integration only covers the wavelength range provided and not the entire solar file range\n")
-        # loop through each simulation to calculate solar reflectance
-        for i in range(sims):
-            # add the specular and diffuse reflectance together for total reflectance
-            refl[:, 1] = (results[i*sims_per_medium:(i+1)*sims_per_medium, 0]+results[i*sims_per_medium:(i+1)*sims_per_medium, 1])
-            tra[:, 1] = (results[i * sims_per_medium:(i + 1) * sims_per_medium, 3])
-            # send to function to integrate
-            solar_r[i], solar_a[i], solar_t[i] = solar_spectrum(solar_file, refl, tra)
+    solar_r, solar_a, solar_t, solar = integrate_solar(solar, sims, wavelengths, start, end, results, sims_per_medium)
 
-    else:
-        solar = ""
+    # write output script
+    length = write_output_script(results, sims, output_name, solar, solar_r, solar_a, solar_t, wavelengths, prop, infile)
 
-    # save output scripts
-    length = int(len(results[:, 0])/sims)
-    prop_line = 0
-    for i in range(sims):
-        output_sim = str(output_name) + str(i+1) +".txt"
-        with open(output_sim, 'w') as f:
-            f.write('Sim ' + str(i+1) + '\n')
-            f.write('\n')
-            if solar != "":
-                f.write('Solar R: ' + str(abs(round(solar_r[i], 4))) + '\n')
-                f.write('Solar A: ' + str(abs(round(solar_a[i], 4))) + '\n')
-                f.write('Solar T: ' + str(abs(round(solar_t[i], 4))) + '\n')
-                f.write('\n')
-            f.write('WL\tR\tA\tT')
-            num_layers = int(results[i*length, 4])
-            for layer in range(num_layers):
-                f.write('\tn(' + str(layer+1) + ')' + '\tmu_a(' + str(layer+1) + ')'+ '\tmu_s(' + str(layer+1) + ')'+ '\tg(' + str(layer+1) + ')'+ '\tt(' + str(layer+1) + ')')
-            f.write('\n')
-            for j in range(length):
-                f.write(str(round(wavelengths[j], 4)) + '\t')
-                f.write(str(round(results[j+length*i, 0]+results[j + length * i, 1], 4)) + '\t')
-                f.write(str(round(results[j + length * i, 2], 4)) + '\t')
-                f.write(str(round(results[j + length * i, 3], 4)) + '\t')
-                # save properties
-                while prop[prop_line, 0] != 0:
-                    prop_line += 1
-                for layer in range(num_layers):
-                    f.write(str(round(prop[prop_line-(1+num_layers)+layer, 0], 4)) + '\t')
-                    f.write(str(round(prop[prop_line - (1+num_layers) + layer, 1]/10000, 4)) + '\t')
-                    f.write(str(round(prop[prop_line - (1+num_layers) + layer, 2]/10000, 4)) + '\t')
-                    f.write(str(round(prop[prop_line - (1+num_layers) + layer, 3], 4)) + '\t')
-                    f.write(str(round(prop[prop_line - (1+num_layers) + layer, 4]*10000, 4)) + '\t')
-                prop_line += 1
-                f.write('\n')
-            f.write('\n')
-            f.write('Input file:\n')
-            for j in range(len(infile)):
-                if infile[j][:3] == "sim":
-                    break
-                f.write(infile[j] + '\n')
-            for j in range(len(infile)):
-                if infile[j][:] == "sim"+str(i+1):
-                    f.write('\n')
-                    f.write("sim"+str(i+1) + '\n')
-                    for k in range(j+1, len(infile)):
-                        if infile[k][:3] == "sim":
-                            break
-                        f.write(infile[k] + '\n')
-                    break
+    # plot results
+    plot_results(sims, results, length, wavelengths, solar, start, end, output_name)
 
-
-        f.close()
-
-    ###### plot the results ######
-    # plot configuration
-    plt.style.use('default')
-    figsize = (10,8)
-    dpi = 600
-    axis_font_size = 15 # font_size = 6
-    label_font_size = 17 # font_size = 7
-    linewidth = 1.5
-
-    plt.rcParams['xtick.direction'] = 'in'
-    plt.rcParams['ytick.direction'] = 'in'
-    plt.rcParams['font.size'] = axis_font_size
-    plt.rcParams['font.sans-serif'] = ['Arial']
-    
-    # plot the spectral response
-    for i in range(sims):
-        # get the result of this run
-        R_results = results[i*length:(i+1)*length, 0]+results[i*length:(i+1)*length, 1]
-        A_results = results[i*length:(i+1)*length, 2]
-        T_results = results[i*length:(i+1)*length, 3]
-        
-        # plot the R, A, T
-        plt.figure(figsize=figsize,dpi=dpi)
-        plt.plot(wavelengths, R_results, label="R",color = 'black',linewidth = linewidth)
-        plt.plot(wavelengths, A_results, label="A",color = 'red',linewidth = linewidth)
-        plt.plot(wavelengths, T_results, label="T",color = 'blue',linewidth = linewidth)
-
-        # plot the solar spectrum
-        if solar != "":
-            solar_arr = loadtxt(solar)
-            plt.fill_between(solar_arr[:,0],
-                    solar_arr[:,1]/max(solar_arr[:,1]),
-                    color='pink',
-                    alpha=0.5)
-
-        # plot configuration
-        plt.xlim(start, end)
-        plt.ylim(0,1)
-        plt.xlabel('Wavelength (\u03BCm)',fontsize = label_font_size)
-        plt.ylabel('Spectral Responce',fontsize = label_font_size)
-        plt.legend(loc='upper right',frameon=False,fontsize = axis_font_size)
-        plt.savefig(str(output_name)+"_plot{}.png".format(i+1))
-    print("Results saved!")
-    ###### end of plot the results ######
+    if return_array is True:
+        wavelengths = wavelengths.reshape(-1, 1)
+        R_results = (results[:, 0] + results[:, 1]).reshape(-1, 1)
+        A_results = results[:, 2].reshape(-1, 1)
+        T_results = results[:, 3].reshape(-1, 1)
+        output_array = concatenate((wavelengths, R_results, A_results, T_results), axis=1)
+        return output_array
     return
 
 
 if __name__ == "__main__":
     print('\033[1m{: ^75s}\033[0m'.format("FOS"))
     print('{: ^75s}'.format("Fast Optical Spectrum calculations for nanoparticle media"))
-    print('{: ^75s}'.format("Version: 0.6.4\n"))
-    print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiulin Ruan"))
+    print('{: ^75s}'.format("Version: 0.6.5\n"))
+    print('{: ^75s}'.format("Daniel Carne, Joseph Peoples, Ziqi Guo, Dudong Feng, Zherui Han, Xiaojie Liu, Xiulin Ruan"))
     print('{: ^75s}'.format("School of Mechanical Engineering, Purdue University"))
     print('{: ^75s}'.format("West Lafayette, IN 47907, USA\n"))
 
